@@ -1,0 +1,57 @@
+{
+  "name": "sm-datatable",
+  "version": "1.2.17",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/sm-datatable.js",
+      "require": "./dist/sm-datatable.umd.cjs"
+    },
+    "./style.css": "./dist/sm-datatable.css"
+  },
+  "main": "./dist/sm-datatable.umd.cjs",
+  "module": "./dist/sm-datatable.js",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smartmedapp/sm-datatable.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:lib": "vite build --mode lib",
+    "preview": "vite preview",
+    "lint": "eslint . --fix --cache",
+    "format": "prettier --write --experimental-cli src/",
+    "type-check": "vue-tsc --noEmit"
+  },
+  "peerDependencies": {
+    "vue": "^3.4.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^25.5.0",
+    "@typescript-eslint/parser": "^8.57.2",
+    "@vitejs/plugin-vue": "^6.0.2",
+    "@vue/eslint-config-prettier": "^10.2.0",
+    "@vue/eslint-config-typescript": "^14.7.0",
+    "@vue/tsconfig": "^0.9.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-vue": "~10.5.1",
+    "globals": "^16.5.0",
+    "prettier": "3.6.2",
+    "sass-embedded": "^1.97.0",
+    "typescript": "^6.0.2",
+    "typescript-eslint": "^8.57.2",
+    "vite": "^7.2.4",
+    "vite-plugin-css-injected-by-js": "^3.5.2",
+    "vite-plugin-vue-devtools": "^8.0.5",
+    "vue": "^3.5.25",
+    "vue-tsc": "^3.2.6"
+  }
+}
