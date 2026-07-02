@@ -155,7 +155,11 @@
             v-for="(item, index) in visibleItems"
             :key="isVirtualScrollEnabled ? virtualScrollState.startIndex + index : index"
           >
-            <tr v-bind="props.rowProps">
+            <tr
+              v-bind="props.rowProps"
+              @click="onRowClick($event, item)"
+              @dblclick="onRowDblClick($event, item)"
+            >
               <td
                 v-if="props.showExpand"
                 class="b__expand-td"
@@ -293,9 +297,19 @@ const props = defineProps({
   virtualScrollBuffer: { type: Number, default: 5 }, // Extra rows to render above/below viewport
   showExpand: { type: Boolean, default: false },
   showSelect: { type: Boolean, default: false },
+  // When true, a single click on a cell copies its displayed text to the clipboard (with a flash animation)
+  copyOnCellClick: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['update:sort', 'update:currentItems', 'update:expanded', 'row:expand', 'update:checked'])
+const emit = defineEmits([
+  'update:sort',
+  'update:currentItems',
+  'update:expanded',
+  'row:expand',
+  'update:checked',
+  'click:row',
+  'db-click:row',
+])
 
 const borderConfig = computed(() => ({
   vertical: false,
@@ -363,6 +377,96 @@ function toggleAllChecked() {
     checkedRows.value = [...processedItems.value]
   }
   emit('update:checked', [...checkedRows.value])
+}
+
+// ============================================
+// Row click / double-click + click-to-copy
+// ============================================
+// A double-click also fires two `click` events, so the single-click emit is
+// deferred; a `dblclick` cancels the pending single click.
+const CLICK_DELAY = 220
+let rowClickTimer = null
+
+// True when the click originated from (or inside) an interactive control, so we
+// skip row events and copy for checkboxes, expand/action buttons, links, etc.
+function isInteractiveTarget(el, boundary) {
+  let node = el
+  while (node && node !== boundary) {
+    if (node.nodeType === 1) {
+      const tag = node.tagName
+      if (['BUTTON', 'A', 'INPUT', 'SELECT', 'TEXTAREA', 'LABEL', 'OPTION'].includes(tag)) return true
+      if (node.isContentEditable) return true
+      if (node.getAttribute && node.getAttribute('role') === 'button') return true
+    }
+    node = node.parentElement
+  }
+  return false
+}
+
+function onRowClick(event, item) {
+  if (isInteractiveTarget(event.target, event.currentTarget)) return
+
+  // Capture the clicked cell now; the actual work runs after the dblclick window.
+  const cell = event.target.closest ? event.target.closest('td') : null
+
+  if (rowClickTimer) clearTimeout(rowClickTimer)
+  rowClickTimer = setTimeout(() => {
+    rowClickTimer = null
+    emit('click:row', item)
+    if (props.copyOnCellClick && cell) copyCell(cell)
+  }, CLICK_DELAY)
+}
+
+function onRowDblClick(event, item) {
+  if (isInteractiveTarget(event.target, event.currentTarget)) return
+
+  // Cancel the pending single-click so only the double-click event fires.
+  if (rowClickTimer) {
+    clearTimeout(rowClickTimer)
+    rowClickTimer = null
+  }
+  emit('db-click:row', item)
+}
+
+function copyCell(cell) {
+  const text = (cell.innerText || '').trim()
+  if (!text) return
+  copyToClipboard(text)
+  flashCell(cell)
+}
+
+// Restart-safe flash: clears any in-flight animation timer stored on the node.
+function flashCell(cell) {
+  cell.classList.remove('b__cell-copied')
+  void cell.offsetWidth // force reflow so the animation replays on rapid re-clicks
+  cell.classList.add('b__cell-copied')
+  clearTimeout(cell._copyTimer)
+  cell._copyTimer = setTimeout(() => cell.classList.remove('b__cell-copied'), 500)
+}
+
+async function copyToClipboard(text) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text)
+      return
+    }
+  } catch {
+    // fall through to the legacy path below
+  }
+  try {
+    const ta = document.createElement('textarea')
+    ta.value = text
+    ta.setAttribute('readonly', '')
+    ta.style.position = 'fixed'
+    ta.style.top = '-9999px'
+    ta.style.opacity = '0'
+    document.body.appendChild(ta)
+    ta.select()
+    document.execCommand('copy')
+    document.body.removeChild(ta)
+  } catch {
+    // clipboard unavailable — nothing more we can do
+  }
 }
 
 const searchQuery = ref('')
@@ -766,6 +870,24 @@ $density-compact-height: 34px;
 // Row hover functionality
 .b__table-wrapper.b__hover-enabled .b__table tbody tr {
   transition: background-color $transition-duration ease;
+}
+
+// Click-to-copy feedback: a smooth scale "press" on the clicked cell — dips down then back up.
+.b__table .b__cell-copied {
+  transform-origin: center;
+  animation: b__cell-copy-pop 0.3s ease-in-out;
+}
+
+@keyframes b__cell-copy-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 // ============================================

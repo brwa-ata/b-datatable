@@ -397,6 +397,9 @@
       @row:expand="handleExpand"
       @update:expanded="handleUpdateExpanded"
       @update:checked="handleUpdateChecked"
+      @click:row="handleRowClick"
+      @db-click:row="handleRowDblClick"
+      :copy-on-cell-click="props.copyOnCellClick"
       v-bind="$attrs"
     >
       <template #headers="{ columns, getSortIcon, toggleSort, isAllChecked, isIndeterminate, toggleAllChecked }">
@@ -618,6 +621,7 @@ const props = withDefaults(defineProps<BDatatableProps>(), {
   tableHeaderLocalStorageName: null,
   theme: 'light',
   itemKey: 'id',
+  copyOnCellClick: false,
 })
 
 const emit = defineEmits<{
@@ -637,6 +641,8 @@ const emit = defineEmits<{
   'row:expand': [row: object]
   'update:expanded': [rows: Array<object>]
   'update:checked': [rows: Array<object>]
+  'click:row': [row: object]
+  'db-click:row': [row: object]
 }>()
 
 const hasLeftActions = computed(
@@ -838,6 +844,14 @@ function handleUpdateExpanded(arr: Array<object>) {
 
 function handleUpdateChecked(arr: Array<object>) {
   emit('update:checked', arr)
+}
+
+function handleRowClick(row: object) {
+  emit('click:row', row)
+}
+
+function handleRowDblClick(row: object) {
+  emit('db-click:row', row)
 }
 
 // ============================================

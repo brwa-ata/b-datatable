@@ -39,6 +39,9 @@
       @click:reset="handleReset()"
       @click:search="handleSearch()"
       @click:print="handlePrint()"
+      @click:row="handleRowClick"
+      @db-click:row="handleRowDblClick"
+      copy-on-cell-click
       @update:text-filter="handleUpdateTextFilter"
       @update:number-filter="handleUpdateNumberFilter"
       @update:list-filter="handleUpdateListFilter"
@@ -460,6 +463,13 @@ function handleSearch() {
 
 function handlePrint() {
   console.log('handlePrint')
+}
+
+function handleRowClick(data: object) {
+  console.log(data)
+}
+function handleRowDblClick(data: object) {
+  console.log(data)
 }
 
 function formatDateTime(dateTimeString: string) {

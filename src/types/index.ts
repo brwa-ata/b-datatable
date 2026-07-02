@@ -98,4 +98,5 @@ export default interface BDatatableProps {
   theme?: Theme
   itemKey?: string
   filterHeaderRowBgColor?: string
+  copyOnCellClick?: boolean
 }
