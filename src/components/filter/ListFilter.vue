@@ -31,18 +31,6 @@
             stroke-linejoin="round"
           ></path>
         </svg>
-        <!-- <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="12"
-          height="12"
-          fill="currentColor"
-          viewBox="0 0 16 16"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
-          />
-        </svg> -->
       </button>
       <input
         readonly
@@ -58,22 +46,31 @@
     >
       <!-- toolbar -->
       <div class="lf__toolbar">
-        <div class="lf__radios">
-          <label class="lf__radio-label">
+        <div
+          class="lf__segment"
+          role="radiogroup"
+        >
+          <label
+            class="lf__seg"
+            :class="{ 'lf__seg--active': lookup === 'in' }"
+          >
             <input
               v-model="lookup"
               type="radio"
               value="in"
-              class="lf__radio"
+              class="lf__seg-input"
             />
             In
           </label>
-          <label class="lf__radio-label">
+          <label
+            class="lf__seg"
+            :class="{ 'lf__seg--active': lookup === 'not_in' }"
+          >
             <input
               v-model="lookup"
               type="radio"
               value="not_in"
-              class="lf__radio"
+              class="lf__seg-input"
             />
             Not In
           </label>
@@ -113,20 +110,45 @@
           v-for="(item, index) in filteredList"
           :key="index"
           class="lf__list-item"
+          :class="{ 'lf__list-item--checked': item.checked }"
           @click="item.checked = !item.checked"
         >
           <span class="lf__check-icon">
             <svg
               v-if="item.checked"
               xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              fill="currentColor"
-              viewBox="0 0 16 16"
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              color="currentColor"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
             >
               <path
-                d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"
-              />
+                d="M2.5 12C2.5 7.52166 2.5 5.28249 3.89124 3.89124C5.28249 2.5 7.52166 2.5 12 2.5C16.4783 2.5 18.7175 2.5 20.1088 3.89124C21.5 5.28249 21.5 7.52166 21.5 12C21.5 16.4783 21.5 18.7175 20.1088 20.1088C18.7175 21.5 16.4783 21.5 12 21.5C7.52166 21.5 5.28249 21.5 3.89124 20.1088C2.5 18.7175 2.5 16.4783 2.5 12Z"
+              ></path>
+              <path
+                d="M8 12.5L10.5 15L16 9"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ></path>
+            </svg>
+
+            <svg
+              v-else
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              color="currentColor"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <path
+                d="M2.5 12C2.5 7.52166 2.5 5.28249 3.89124 3.89124C5.28249 2.5 7.52166 2.5 12 2.5C16.4783 2.5 18.7175 2.5 20.1088 3.89124C21.5 5.28249 21.5 7.52166 21.5 12C21.5 16.4783 21.5 18.7175 20.1088 20.1088C18.7175 21.5 16.4783 21.5 12 21.5C7.52166 21.5 5.28249 21.5 3.89124 20.1088C2.5 18.7175 2.5 16.4783 2.5 12Z"
+              ></path>
             </svg>
           </span>
           {{ getItemTitle(item) }}
@@ -254,9 +276,10 @@ function applyFilter() {
     z-index: 1000;
     min-width: 240px;
     max-width: 300px;
-    background-color: var(--sm-dropdown-bg, #fff);
-    border: 1px solid var(--sm-dropdown-border, rgba(0, 0, 0, 0.12));
-    border-radius: 6px;
+    background-color: transparent;
+    backdrop-filter: blur(25px);
+    border: 1px solid var(--b-dropdown-border);
+    border-radius: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     overflow: hidden;
   }
@@ -266,30 +289,62 @@ function applyFilter() {
     align-items: center;
     justify-content: space-between;
     padding: 8px 10px;
-    border-bottom: 1px solid var(--sm-dropdown-border, rgba(0, 0, 0, 0.1));
+    border-bottom: 1px solid var(--b-dropdown-border, rgba(0, 0, 0, 0.1));
   }
 
-  &__radios {
-    display: flex;
+  &__segment {
+    display: inline-flex;
     align-items: center;
-    gap: 10px;
+    padding: 3px;
+    background-color: rgba(200, 200, 200, 0.35);
+    border-radius: 16px;
+
+    .b__theme-dark & {
+      background-color: rgba(100, 100, 100, 0.24);
+    }
   }
 
-  &__radio-label {
-    display: flex;
+  &__seg-input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &__seg {
+    display: inline-flex;
     align-items: center;
-    gap: 4px;
-    font-size: 12px;
+    justify-content: center;
+    padding: 2px 14px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+    border-radius: 12px;
     cursor: pointer;
-    color: var(--sm-dropdown-text, inherit);
     white-space: nowrap;
-  }
+    user-select: none;
+    color: var(--b-dropdown-text, inherit);
+    transition:
+      background-color 0.2s ease,
+      box-shadow 0.2s ease,
+      color 0.2s ease;
 
-  &__radio {
-    width: 14px;
-    height: 14px;
-    cursor: pointer;
-    accent-color: var(--sm-color-blue);
+    &--active {
+      background-color: #fff;
+      color: #000;
+      box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.12),
+        0 1px 1px rgba(0, 0, 0, 0.08);
+
+      .b__theme-dark & {
+        background-color: #636366;
+        color: #fff;
+        box-shadow:
+          0 1px 3px rgba(0, 0, 0, 0.3),
+          0 1px 1px rgba(0, 0, 0, 0.2);
+      }
+    }
   }
 
   &__actions {
@@ -301,14 +356,14 @@ function applyFilter() {
     height: 26px;
     padding: 0 10px;
     font-size: 12px;
-    border-radius: 6px;
+    border-radius: 8px;
     border: none;
     cursor: pointer;
     white-space: nowrap;
 
     &--clear {
       background-color: transparent;
-      color: var(--sm-dropdown-text, inherit);
+      color: var(--b-dropdown-text, inherit);
 
       &:hover {
         background-color: rgba(0, 0, 0, 0.09);
@@ -316,8 +371,8 @@ function applyFilter() {
     }
 
     &--apply {
-      background-color: var(--sm-dropdown-hover, rgba(0, 0, 0, 1));
-      color: var(--sm-dropdown-text, inherit);
+      background-color: var(--b-dropdown-hover, rgba(0, 0, 0, 1));
+      color: var(--b-dropdown-text, inherit);
 
       &:hover {
         background-color: rgba(0, 0, 0, 0.15);
@@ -327,48 +382,53 @@ function applyFilter() {
 
   &__search-wrap {
     padding: 8px 10px;
-    border-bottom: 1px solid var(--sm-dropdown-border, rgba(0, 0, 0, 0.1));
+    border-bottom: 1px solid var(--b-dropdown-border, rgba(0, 0, 0, 0.1));
   }
 
   &__search-input {
     width: 100%;
-    height: 28px;
+    height: 30px;
     padding: 0 8px;
     font-size: 12px;
     outline: none;
-    border: 1px solid var(--sm-dropdown-border, rgba(0, 0, 0, 0.2));
-    border-radius: 6px;
+    border: 1px solid var(--b-dropdown-border, rgba(0, 0, 0, 0.2));
+    border-radius: 8px;
     background: transparent;
-    color: var(--sm-dropdown-text, inherit);
+    color: var(--b-dropdown-text, inherit);
 
     &::placeholder {
       opacity: 0.8;
     }
 
     &:focus {
-      border: 1px solid var(--sm-color-blue);
+      border: 1px solid var(--b-color-blue);
     }
   }
 
   &__list {
-    max-height: 220px;
+    max-height: 250px;
     overflow-y: auto;
-    padding: 4px 0;
+    padding: 4px 6px;
   }
 
   &__list-item {
     display: flex;
     align-items: center;
     min-height: 32px;
-    padding: 0 10px;
+    padding: 0 4px;
     font-size: 13px;
+    border-radius: 8px;
     cursor: pointer;
     user-select: none;
     white-space: nowrap;
-    color: var(--sm-dropdown-text, inherit);
+    color: var(--b-dropdown-text, inherit);
 
     &:hover {
-      background-color: var(--sm-dropdown-hover, rgba(0, 0, 0, 0.05));
+      background-color: var(--b-dropdown-hover, rgba(0, 0, 0, 0.05));
+    }
+
+    &--checked {
+      color: var(--b-color-blue);
     }
   }
 
@@ -378,7 +438,7 @@ function applyFilter() {
     justify-content: center;
     width: 22px;
     flex-shrink: 0;
-    color: var(--sm-color-blue);
+    margin-inline-end: 2px;
   }
 
   .lf__display-input,
@@ -386,7 +446,7 @@ function applyFilter() {
     font-size: 13px;
   }
   .lf__display-input::placeholder {
-    color: var(--sm-input-placeholder);
+    color: var(--b-input-placeholder);
   }
 }
 </style>

@@ -1,5 +1,5 @@
 /**
- * Local (client-side) filtering logic for SmDatatable.
+ * Local (client-side) filtering logic for BDatatable.
  *
  * These helpers operate on the full backend response that is already held in
  * memory, so text / number / list filters can be applied without issuing a new

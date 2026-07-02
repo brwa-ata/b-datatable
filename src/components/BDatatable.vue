@@ -1,24 +1,27 @@
 <template>
-  <div class="sm-dt">
+  <div class="b-dt">
     <!-- toolbar -->
     <div
-      class="sm-dt__toolbar"
-      :class="`sm-dt__toolbar--${props.theme}`"
+      class="b-dt__toolbar"
+      :class="`b-dt__toolbar--${props.theme}`"
     >
       <!-- custom slot: occupies left side, pushes toolbar buttons to the right -->
-      <div class="sm-dt__toolbar-slot">
+      <div class="b-dt__toolbar-slot">
         <slot name="prepend-table-toolbar" />
       </div>
 
-      <!-- left actions -->
-      <div class="sm-dt__toolbar-left">
+      <!-- left actions (grouped in a rounded pill) -->
+      <div
+        v-if="hasLeftActions"
+        class="b-dt__toolbar-left"
+      >
         <button
           v-if="props.showResetBtn"
-          class="sm-dt__tool-btn"
+          class="b-dt__tool-btn"
           type="button"
           title="Refresh"
           :disabled="props.loading"
-          :class="{ 'sm-dt__btn-disabled': props.loading }"
+          :class="{ 'b-dt__btn-disabled': props.loading }"
           @click="handleReset"
         >
           <svg
@@ -42,11 +45,11 @@
 
         <button
           v-if="props.showSearchBtn"
-          class="sm-dt__tool-btn"
+          class="b-dt__tool-btn"
           type="button"
           title="Search"
           :disabled="props.loading"
-          :class="{ 'sm-dt__btn-disabled': props.loading }"
+          :class="{ 'b-dt__btn-disabled': props.loading }"
           @click="handleSearch()"
         >
           <svg
@@ -70,11 +73,11 @@
 
         <button
           v-if="props.showPrintBtn"
-          class="sm-dt__tool-btn"
+          class="b-dt__tool-btn"
           type="button"
           title="Print"
           :disabled="props.loading"
-          :class="{ 'sm-dt__btn-disabled': props.loading }"
+          :class="{ 'b-dt__btn-disabled': props.loading }"
           @click="handlePrint()"
         >
           <svg
@@ -106,11 +109,11 @@
 
         <button
           v-if="props.showExportToExcelBtn"
-          class="sm-dt__tool-btn sm-dt__tool-btn--excel"
+          class="b-dt__tool-btn b-dt__tool-btn--excel"
           type="button"
           title="Export to Excel"
           :disabled="props.loading || props.exportLoading"
-          :class="{ 'sm-dt__btn-disabled': props.loading || props.exportLoading }"
+          :class="{ 'b-dt__btn-disabled': props.loading || props.exportLoading }"
           @click="handleExcel"
         >
           <svg
@@ -139,7 +142,7 @@
 
           <svg
             v-else
-            class="sm-dt__spinner"
+            class="b-dt__spinner"
             xmlns="http://www.w3.org/2000/svg"
             width="17"
             height="17"
@@ -162,15 +165,15 @@
         <!-- show/hide table columns -->
         <div
           v-if="props.showToggleHeaderBtn"
-          class="sm-dt__columns"
+          class="b-dt__columns"
           ref="columnsWrapper"
         >
           <button
-            class="sm-dt__tool-btn"
+            class="b-dt__tool-btn"
             type="button"
             title="Toggle Columns"
             :disabled="props.loading"
-            :class="{ 'sm-dt__btn-disabled': props.loading }"
+            :class="{ 'b-dt__btn-disabled': props.loading }"
             @click="showColumnsDropdown = !showColumnsDropdown"
           >
             <svg
@@ -199,16 +202,16 @@
           </button>
           <div
             v-if="showColumnsDropdown"
-            class="sm-dt__columns-dropdown"
+            class="b-dt__columns-dropdown"
           >
-            <ul class="sm-dt__col-panel">
+            <ul class="b-dt__col-panel">
               <li
                 v-for="(key, index) in columnOrder"
                 :key="key"
-                class="sm-dt__columns-item sm-dt__reorder-item"
+                class="b-dt__columns-item b-dt__reorder-item"
                 :class="{
-                  'sm-dt__reorder-item--dragging': dragSourceIndex === index,
-                  'sm-dt__reorder-item--dragover': dragOverIndex === index && dragSourceIndex !== index,
+                  'b-dt__reorder-item--dragging': dragSourceIndex === index,
+                  'b-dt__reorder-item--dragover': dragOverIndex === index && dragSourceIndex !== index,
                 }"
                 draggable="true"
                 @click="toggleColumn(key)"
@@ -218,7 +221,7 @@
                 @dragend="onDragEnd"
               >
                 <span
-                  class="sm-dt__reorder-handle"
+                  class="b-dt__reorder-handle"
                   @click.stop
                 >
                   <svg
@@ -233,7 +236,7 @@
                     />
                   </svg>
                 </span>
-                <span class="sm-dt__columns-check">
+                <span class="b-dt__columns-check">
                   <svg
                     v-if="!hiddenColumns.has(key)"
                     xmlns="http://www.w3.org/2000/svg"
@@ -250,10 +253,10 @@
                 {{ props.headers.find((h) => h.key === key)?.title ?? key }}
               </li>
             </ul>
-            <div class="sm-dt__reorder-footer">
+            <div class="b-dt__reorder-footer">
               <button
                 type="button"
-                class="sm-dt__reorder-reset-btn"
+                class="b-dt__reorder-reset-btn"
                 @click="resetColumnOrder"
               >
                 Restore Default
@@ -264,18 +267,18 @@
       </div>
 
       <!-- right: per-page + pagination -->
-      <div class="sm-dt__toolbar-right">
+      <div class="b-dt__toolbar-right">
         <!-- per-page dropdown -->
         <div
           v-if="props.showPerPageBtn"
-          class="sm-dt__perpage"
+          class="b-dt__perpage"
           ref="perPageWrapper"
         >
           <button
-            class="sm-dt__perpage-btn"
+            class="b-dt__perpage-btn"
             type="button"
             :disabled="props.loading"
-            :class="{ 'sm-dt__btn-disabled': props.loading }"
+            :class="{ 'b-dt__btn-disabled': props.loading }"
             @click="showPerPageDropdown = !showPerPageDropdown"
           >
             {{ props.perPage }}
@@ -296,13 +299,13 @@
           </button>
           <ul
             v-if="showPerPageDropdown"
-            class="sm-dt__perpage-dropdown"
+            class="b-dt__perpage-dropdown"
           >
             <li
               v-for="opt in perPageList"
               :key="opt"
-              class="sm-dt__perpage-option"
-              :class="{ 'sm-dt__perpage-option--active': props.perPage === opt }"
+              class="b-dt__perpage-option"
+              :class="{ 'b-dt__perpage-option--active': props.perPage === opt }"
               @click="setPerPage(opt)"
             >
               {{ opt }}
@@ -311,62 +314,68 @@
         </div>
 
         <template v-if="props.showPrevAndNextBtn">
-          <!-- pagination info -->
-          <span class="sm-dt__pagination-info">
-            {{ paginationFrom }} - {{ paginationTo }} /
-            <strong>{{ (props.results.total || 0).toLocaleString() }}</strong>
+          <!-- total count badge -->
+          <span
+            class="b-dt__count-badge"
+            :title="`${(props.apiData.count || 0).toLocaleString()} records`"
+          >
+            {{ (props.apiData.count || 0).toLocaleString() }}
           </span>
 
-          <!-- prev / page / next -->
-          <button
-            class="sm-dt__page-btn"
-            type="button"
-            :disabled="props.page <= 1 || props.loading || !props.results.prev_page_url"
-            :class="{ 'sm-dt__btn-disabled': props.loading }"
-            @click="prevPage()"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="12"
-              height="12"
-              fill="currentColor"
-              viewBox="0 0 16 16"
+          <!-- prev / page / next (unified segmented pill) -->
+          <div class="b-dt__pager">
+            <button
+              class="b-dt__pager-btn"
+              type="button"
+              :disabled="props.page <= 1 || props.loading || !props.apiData.previous"
+              @click="prevPage()"
             >
-              <path
-                fill-rule="evenodd"
-                d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"
-              />
-            </svg>
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="22"
+                height="22"
+                color="currentColor"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M15 6C15 6 9.00001 10.4189 9 12C8.99999 13.5812 15 18 15 18"></path>
+              </svg>
+            </button>
 
-          <span style="margin: 0px 4px; font-size: 14px">{{ props.page }}</span>
+            <span class="b-dt__pager-info">{{ props.page }} / {{ props.pageCount }}</span>
 
-          <button
-            class="sm-dt__page-btn"
-            type="button"
-            :disabled="props.loading || !props.results.next_page_url"
-            :class="{ 'sm-dt__btn-disabled': props.loading }"
-            @click="nextPage()"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="12"
-              height="12"
-              fill="currentColor"
-              viewBox="0 0 16 16"
+            <button
+              class="b-dt__pager-btn"
+              type="button"
+              :disabled="props.loading || !props.apiData.next"
+              @click="nextPage()"
             >
-              <path
-                fill-rule="evenodd"
-                d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"
-              />
-            </svg>
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="22"
+                height="22"
+                color="currentColor"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M9.00005 6C9.00005 6 15 10.4189 15 12C15 13.5812 9 18 9 18"></path>
+              </svg>
+            </button>
+          </div>
         </template>
       </div>
     </div>
 
     <!-- table -->
-    <SmTable
+    <BTable
       :headers="visibleHeaders"
       :items="tableItems"
       :height="props.height"
@@ -394,15 +403,15 @@
         <tr>
           <th
             v-if="props.showExpand"
-            class="sm__expand-th"
+            class="b__expand-th"
           ></th>
           <th
             v-if="props.showSelect"
-            class="sm__select-th"
+            class="b__select-th"
           >
             <input
               type="checkbox"
-              class="sm__select-checkbox"
+              class="b__select-checkbox"
               :checked="isAllChecked"
               :indeterminate="isIndeterminate"
               @change="toggleAllChecked"
@@ -412,17 +421,17 @@
             v-for="column in columns"
             :key="column.key"
             v-bind="column.headerProps"
-            :class="{ sm__sortable: column.sortable }"
+            :class="{ b__sortable: column.sortable }"
             @click="column.sortable ? toggleSort(column.key) : null"
           >
             <div
-              class="sm__header-content"
+              class="b__header-content"
               :style="column.align ? { justifyContent: column.align } : {}"
             >
               {{ column.title }}
               <span
                 v-if="column.sortable"
-                class="sm__sort-icon"
+                class="b__sort-icon"
               >
                 <component
                   :is="getSortIcon(column.key).component"
@@ -438,12 +447,12 @@
           <td
             v-if="props.showExpand"
             :style="`background-color: ${props.filterHeaderRowBgColor}`"
-            class="sm__expand-th"
+            class="b__expand-th"
           ></td>
           <td
             v-if="props.showSelect"
             :style="`background-color: ${props.filterHeaderRowBgColor}`"
-            class="sm__select-th"
+            class="b__select-th"
           ></td>
           <template
             v-for="column in columns"
@@ -520,7 +529,7 @@
         </div>
       </template>
 
-      <template #sm-expanded-row="{ index, item }">
+      <template #b-expanded-row="{ index, item }">
         <slot
           name="expanded-row"
           :item="item"
@@ -529,10 +538,10 @@
       </template>
 
       <template
-        v-if="props.showTotals && props?.results?.footer"
+        v-if="props.showTotals && props?.apiData?.footer"
         #footer
       >
-        <tr class="sm__sticky-table-footer">
+        <tr class="b__sticky-table-footer">
           <td v-if="props.showSelect" />
           <td v-if="props.showExpand" />
           <td
@@ -540,17 +549,17 @@
             :key="footerIndex"
           >
             <div v-if="footer.key === 'counter_column'" />
-            <div v-else>{{ formatNumber(props.results.footer[footer.key]) }}</div>
+            <div v-else>{{ formatNumber(props.apiData.footer[footer.key]) }}</div>
           </td>
         </tr>
       </template>
-    </SmTable>
+    </BTable>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import SmTable from './SmTable.vue'
+import BTable from './BTable.vue'
 import TextFilter from './filter/TextFilter.vue'
 import NumberFilter from './filter/NumberFilter.vue'
 import ListFilter from './filter/ListFilter.vue'
@@ -564,25 +573,26 @@ import {
   type LocalNumberSymbol,
   type LocalListLookup,
 } from './filterLocal/localFilter'
-import type SmDatatableProps from '../types'
+import type BDatatableProps from '../types'
 import type {
-  SmTableListFilter,
-  SmTableNumberFilter,
-  SmTablePerPage,
-  SmTableSort,
-  SmTableTextFilter,
+  BTableListFilter,
+  BTableNumberFilter,
+  BTablePerPage,
+  BTableSort,
+  BTableTextFilter,
   TableHeader,
 } from '../types'
 
-const props = withDefaults(defineProps<SmDatatableProps>(), {
+const props = withDefaults(defineProps<BDatatableProps>(), {
   hover: false,
   density: 'default',
   title: null,
   headers: () => [],
   bodySlots: () => [],
-  results: () => ({ data: [], total: 0, footer: {} }),
+  apiData: () => ({ results: [], count: 0, next: '', previous: '' }),
   page: 1,
   perPage: 25,
+  pageCount: 1,
   perPageOptions: () => [10, 25, 50, 100, 150],
   height: null,
   showTotals: false,
@@ -612,13 +622,13 @@ const props = withDefaults(defineProps<SmDatatableProps>(), {
 
 const emit = defineEmits<{
   'update:data': [items: Array<object>]
-  'update:text-filter': [obj: SmTableTextFilter]
-  'update:number-filter': [obj: SmTableNumberFilter]
-  'update:list-filter': [obj: SmTableListFilter]
-  'update:sort': [obj: SmTableSort]
+  'update:text-filter': [obj: BTableTextFilter]
+  'update:number-filter': [obj: BTableNumberFilter]
+  'update:list-filter': [obj: BTableListFilter]
+  'update:sort': [obj: BTableSort]
   'update:prev-page': [page: number]
   'update:next-page': [page: number]
-  'update:per-page': [obj: SmTablePerPage]
+  'update:per-page': [obj: BTablePerPage]
   'update:headers': [headers: TableHeader[]]
   'click:reset': []
   'click:search': []
@@ -628,6 +638,15 @@ const emit = defineEmits<{
   'update:expanded': [rows: Array<object>]
   'update:checked': [rows: Array<object>]
 }>()
+
+const hasLeftActions = computed(
+  () =>
+    props.showResetBtn ||
+    props.showSearchBtn ||
+    props.showPrintBtn ||
+    props.showExportToExcelBtn ||
+    props.showToggleHeaderBtn,
+)
 
 const perPageList = computed(() => props.perPageOptions)
 const perPageWrapper = ref<HTMLElement | null>(null)
@@ -697,13 +716,6 @@ watch(
   },
 )
 
-const paginationFrom = computed(() => {
-  if (!props.results.total) return 0
-  return (props.page - 1) * props.perPage + 1
-})
-
-const paginationTo = computed(() => Math.min(props.page * props.perPage, props.results.total || 0))
-
 function onClickOutside(e: Event) {
   if (perPageWrapper.value && !perPageWrapper.value.contains(e.target as Node)) {
     showPerPageDropdown.value = false
@@ -736,7 +748,7 @@ function prevPage() {
 }
 
 function nextPage() {
-  if (props.results.next_page_url) {
+  if (props.apiData.next) {
     emit('update:next-page', props.page + 1)
   }
 }
@@ -831,9 +843,9 @@ function handleUpdateChecked(arr: Array<object>) {
 // ============================================
 // Local (client-side) filtering
 // ============================================
-// `props.results.data` is typed as object[]; expose a row-shaped view of it so
+// `props.apiData.results` is typed as object[]; expose a row-shaped view of it so
 // the local-filter helpers and ListFilterLocal can index columns by key.
-const dataRows = computed(() => props.results.data as Array<Record<string, unknown>>)
+const dataRows = computed(() => props.apiData.results as Array<Record<string, unknown>>)
 
 // Active local filters, keyed by header `key`. Replaced (not mutated) on change
 // so the `tableItems` computed re-runs and predicates are recompiled once.
@@ -842,7 +854,7 @@ const localFilters = ref<LocalFilterMap>({})
 // Items handed to the table: the raw data when local filtering is off, otherwise
 // the in-memory data after applying every active local filter.
 const tableItems = computed(() => {
-  if (!props.localFilter) return props.results.data
+  if (!props.localFilter) return props.apiData.results
   return applyLocalFilters(dataRows.value, localFilters.value)
 })
 
@@ -868,16 +880,16 @@ function applyLocalListFilter({ key, lookup, values }: { key: string; lookup: Lo
   setLocalFilter(key, values.length ? { type: 'list', lookup, values } : null)
 }
 
-function applyTextFilter(obj: SmTableTextFilter) {
+function applyTextFilter(obj: BTableTextFilter) {
   emit('update:text-filter', obj)
 }
-function applyNumberFilter(obj: SmTableNumberFilter) {
+function applyNumberFilter(obj: BTableNumberFilter) {
   emit('update:number-filter', obj)
 }
-function applyListFilter(obj: SmTableListFilter) {
+function applyListFilter(obj: BTableListFilter) {
   emit('update:list-filter', obj)
 }
-function handleSort(obj: SmTableSort) {
+function handleSort(obj: BTableSort) {
   emit('update:sort', obj)
 }
 
@@ -900,13 +912,15 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
-.sm-dt {
+.b-dt {
   width: 100%;
 
-  .sm-dt__columns-dropdown {
+  .b-dt__columns-dropdown {
     max-height: 350px;
     overflow-y: auto;
     overflow-x: hidden;
+    background-color: transparent;
+    backdrop-filter: blur(25px);
   }
 
   &__toolbar {
@@ -914,92 +928,78 @@ defineExpose({
     align-items: center;
     justify-content: end;
     padding: 4px 8px;
-    gap: 12px;
+    gap: 10px;
     border-bottom: 1px solid transparent;
 
-    .sm-dt__columns-item {
+    .b-dt__columns-item {
       user-select: none;
     }
 
     &--light {
       color: #505050;
 
-      .sm-dt__perpage-btn,
-      .sm-dt__page-btn {
-        background-color: #fff;
-        border-color: #ccc;
+      .b-dt__toolbar-left,
+      .b-dt__perpage-btn,
+      .b-dt__pager,
+      .b-dt__count-badge {
+        background-color: #f5f5f5;
+        border-color: rgba(0, 0, 0, 0.08);
         color: #444;
-
-        &:hover:not(:disabled) {
-          background-color: #e9e9e9;
-        }
       }
 
-      .sm-dt__perpage-dropdown,
-      .sm-dt__columns-dropdown {
-        background-color: #fff;
-        border-color: rgba(0, 0, 0, 0.12);
+      .b-dt__perpage-btn:hover:not(:disabled),
+      .b-dt__pager-btn:hover:not(:disabled),
+      .b-dt__tool-btn:hover {
+        background-color: rgba(0, 0, 0, 0.06);
+      }
+
+      .b-dt__perpage-dropdown,
+      .b-dt__columns-dropdown {
+        border-color: rgba(0, 0, 0, 0.07);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       }
 
-      .sm-dt__perpage-option:hover,
-      .sm-dt__columns-item:hover {
+      .b-dt__perpage-option:hover,
+      .b-dt__columns-item:hover {
         background-color: rgba(0, 0, 0, 0.05);
-      }
-
-      .sm-dt__page-input {
-        background-color: #fff;
-        border-color: #ccc;
-        color: #444;
-      }
-
-      .sm-dt__tool-btn:hover {
-        background-color: rgba(0, 0, 0, 0.08);
       }
     }
 
     &--dark {
       color: #fff;
 
-      .sm-dt__perpage-btn,
-      .sm-dt__page-btn {
-        background-color: rgba(90, 90, 90, 1);
-        border-color: rgba(255, 255, 255, 0.2);
+      .b-dt__toolbar-left,
+      .b-dt__perpage-btn,
+      .b-dt__pager,
+      .b-dt__count-badge {
+        background-color: rgba(45, 45, 45, 1);
+        border-color: rgba(255, 255, 255, 0.08);
         color: #ddd;
-
-        &:hover:not(:disabled) {
-          background-color: rgba(110, 110, 110, 1);
-        }
       }
 
-      .sm-dt__perpage-dropdown,
-      .sm-dt__columns-dropdown {
-        background-color: #2a2a2a;
-        border-color: rgba(255, 255, 255, 0.12);
+      .b-dt__perpage-btn:hover:not(:disabled),
+      .b-dt__pager-btn:hover:not(:disabled),
+      .b-dt__tool-btn:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .b-dt__perpage-dropdown,
+      .b-dt__columns-dropdown {
+        border-color: rgba(255, 255, 255, 0.07);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         color: #ddd;
       }
 
-      .sm-dt__perpage-option:hover,
-      .sm-dt__columns-item:hover {
+      .b-dt__perpage-option:hover,
+      .b-dt__columns-item:hover {
         background-color: rgba(255, 255, 255, 0.08);
       }
 
-      .sm-dt__page-input {
-        background-color: rgba(90, 90, 90, 1);
-        border-color: rgba(255, 255, 255, 0.2);
-        color: #ddd;
-      }
-
-      .sm-dt__tool-btn:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-      }
-
-      .sm-dt__reorder-footer {
+      .b-dt__reorder-footer {
         border-top-color: rgba(255, 255, 255, 0.1);
       }
 
-      .sm-dt__reorder-reset-btn {
+      .b-dt__reorder-reset-btn {
         border-color: rgba(255, 255, 255, 0.2);
 
         &:hover {
@@ -1013,19 +1013,29 @@ defineExpose({
     width: 100%;
   }
 
-  &__toolbar-left,
   &__toolbar-right {
     display: flex;
     align-items: center;
     gap: 6px;
   }
 
+  // left actions grouped in a single rounded pill with segment dividers
+  &__toolbar-left {
+    display: inline-flex;
+    align-items: center;
+    align-self: center;
+    border: 1px solid;
+    border-radius: 160px;
+    gap: 8px;
+    padding: 3px;
+  }
+
   &__tool-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 30px;
+    width: 24px;
+    height: 24px;
     padding: 0;
     background: transparent;
     border: none;
@@ -1036,10 +1046,10 @@ defineExpose({
   }
 
   &__spinner {
-    animation: sm-dt__spin 0.8s linear infinite;
+    animation: b-dt__spin 0.8s linear infinite;
   }
 
-  @keyframes sm-dt__spin {
+  @keyframes b-dt__spin {
     from {
       transform: rotate(0deg);
     }
@@ -1060,7 +1070,7 @@ defineExpose({
     min-width: 180px;
     margin: 0;
     border: 1px solid;
-    border-radius: 12px;
+    border-radius: 16px;
   }
 
   &__col-panel {
@@ -1113,7 +1123,7 @@ defineExpose({
     font-size: 12px;
     background: transparent;
     border: 1px solid rgba(0, 0, 0, 0.18);
-    border-radius: 1rem;
+    border-radius: 16px;
     cursor: pointer;
     color: inherit;
     transition: background-color 0.12s;
@@ -1156,10 +1166,10 @@ defineExpose({
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    height: 24px;
+    height: 30px;
     padding: 0 10px;
     border: 1px solid;
-    border-radius: 6px;
+    border-radius: 16px;
     cursor: pointer;
     font-size: 13px;
     transition: background-color 0.12s;
@@ -1175,7 +1185,9 @@ defineExpose({
     padding: 4px 0;
     list-style: none;
     border: 1px solid;
-    border-radius: 6px;
+    border-radius: 16px;
+    background-color: transparent;
+    backdrop-filter: blur(25px);
   }
 
   &__perpage-option {
@@ -1190,22 +1202,44 @@ defineExpose({
     }
   }
 
-  &__pagination-info {
-    font-size: 14px;
-    padding: 0 6px;
-    white-space: nowrap;
-  }
-
-  &__page-btn {
+  // total records shown in a circular badge (grows to a pill for long numbers)
+  &__count-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
-    padding: 0;
+    min-width: 30px;
+    height: 30px;
+    padding: 0 9px;
     border: 1px solid;
-    border-radius: 6px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    box-sizing: border-box;
+  }
+
+  // unified segmented pill: prev | page / pageCount | next
+  &__pager {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    border: 1px solid;
+    border-radius: 160px;
+    padding: 2px 3px;
+  }
+
+  &__pager-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
     cursor: pointer;
+    color: inherit;
     transition: background-color 0.12s;
 
     &:disabled {
@@ -1214,19 +1248,13 @@ defineExpose({
     }
   }
 
-  &__page-input {
-    width: 44px;
-    height: 28px;
-    text-align: center;
-    border: 1px solid;
-    border-radius: 6px;
+  &__pager-info {
+    display: inline-flex;
+    align-items: center;
+    height: 26px;
+    padding: 0 8px;
     font-size: 13px;
-    outline: none;
-
-    &::-webkit-inner-spin-button,
-    &::-webkit-outer-spin-button {
-      appearance: none;
-    }
+    white-space: nowrap;
   }
 
   &__btn-disabled {
@@ -1236,6 +1264,6 @@ defineExpose({
 }
 
 .active-filter {
-  background-color: var(--sm-active-filter-bg-color) !important;
+  background-color: var(--b-active-filter-bg-color) !important;
 }
 </style>

@@ -1,16 +1,16 @@
 <template>
   <div
     ref="wrapperRef"
-    class="sm__table-wrapper"
+    class="b__table-wrapper"
     :class="{
-      'sm__fixed-header': props.fixedHeader,
-      'sm__border-vertical': borderConfig.vertical,
-      'sm__border-horizontal': borderConfig.horizontal,
-      'sm__border-table': borderConfig.table,
-      'sm__hover-enabled': props.hover,
-      'sm__virtual-scroll-enabled': isVirtualScrollEnabled,
-      [`sm__density-${props.density}`]: true,
-      [`sm__theme-${props.theme}`]: true,
+      'b__fixed-header': props.fixedHeader,
+      'b__border-vertical': borderConfig.vertical,
+      'b__border-horizontal': borderConfig.horizontal,
+      'b__border-table': borderConfig.table,
+      'b__hover-enabled': props.hover,
+      'b__virtual-scroll-enabled': isVirtualScrollEnabled,
+      [`b__density-${props.density}`]: true,
+      [`b__theme-${props.theme}`]: true,
     }"
     :style="{
       ...(props.height ? { height: props.height } : {}),
@@ -21,25 +21,25 @@
     <!-- search input -->
     <div
       v-if="props.localSearch"
-      class="sm__search-container"
+      class="b__search-container"
     >
-      <span class="sm__search-icon"><SearchIcon /></span>
+      <span class="b__search-icon"><SearchIcon /></span>
       <input
         v-model="searchQuery"
         type="text"
-        class="sm__search-input"
+        class="b__search-input"
         placeholder="Search..."
       />
       <span
         v-if="searchQuery"
-        class="sm__clear-icon"
+        class="b__clear-icon"
         @click="clearSearch()"
       >
         <TimesCircleIcon />
       </span>
     </div>
-    <table class="sm__table">
-      <thead :class="{ 'sm__thead-disabled': props.loading }">
+    <table class="b__table">
+      <thead :class="{ 'b__thead-disabled': props.loading }">
         <slot
           name="headers"
           :columns="props.headers"
@@ -54,15 +54,15 @@
           <tr>
             <th
               v-if="props.showExpand"
-              class="sm__expand-th"
+              class="b__expand-th"
             />
             <th
               v-if="props.showSelect"
-              class="sm__select-th"
+              class="b__select-th"
             >
               <input
                 type="checkbox"
-                class="sm__select-checkbox"
+                class="b__select-checkbox"
                 :checked="isAllChecked"
                 :indeterminate="isIndeterminate"
                 @change="toggleAllChecked"
@@ -72,10 +72,10 @@
               v-for="header in props.headers"
               :key="header.key"
               v-bind="header.headerProps"
-              :class="{ sm__sortable: header.sortable }"
+              :class="{ b__sortable: header.sortable }"
               @click="header.sortable ? toggleSort(header.key) : null"
             >
-              <div class="sm__header-content">
+              <div class="b__header-content">
                 <slot
                   :name="`header.${header.key}`"
                   :header="header"
@@ -84,19 +84,19 @@
                 </slot>
                 <span
                   v-if="header.sortable"
-                  class="sm__sort-icon"
+                  class="b__sort-icon"
                 >
                   <SortUpIcon
                     v-if="sortState[header.key] === 'asc'"
-                    class="sm__sort-icon-active"
+                    class="b__sort-icon-active"
                   />
                   <SortDownIcon
                     v-else-if="sortState[header.key] === 'desc'"
-                    class="sm__sort-icon-active"
+                    class="b__sort-icon-active"
                   />
                   <SortIcon
                     v-else
-                    class="sm__sort-icon-inactive"
+                    class="b__sort-icon-inactive"
                   />
                 </span>
               </div>
@@ -106,28 +106,28 @@
 
         <tr
           v-if="props.loading"
-          class="sm__loading-overlay-row"
+          class="b__loading-overlay-row"
         >
           <td
             :colspan="props.headers.length + leadingColCount"
-            class="sm__loading-overlay-cell"
+            class="b__loading-overlay-cell"
           >
-            <div class="sm__loading-progress-bar">
-              <div class="sm__loading-progress-indicator"></div>
+            <div class="b__loading-progress-bar">
+              <div class="b__loading-progress-indicator"></div>
             </div>
           </td>
         </tr>
       </thead>
-      <tbody :class="{ 'sm__tbody-disabled': props.loading }">
+      <tbody :class="{ 'b__tbody-disabled': props.loading }">
         <template v-if="props.loading && !props.items.length">
           <tr>
             <td
               :colspan="props.headers.length + leadingColCount"
-              class="sm__loading-cell"
+              class="b__loading-cell"
             >
-              <div class="sm__loading-container">
-                <div class="sm__loading-progress-bar">
-                  <div class="sm__loading-progress-indicator"></div>
+              <div class="b__loading-container">
+                <div class="b__loading-progress-bar">
+                  <div class="b__loading-progress-indicator"></div>
                 </div>
               </div>
             </td>
@@ -138,7 +138,7 @@
           <!-- Virtual scroll spacer (top) -->
           <tr
             v-if="isVirtualScrollEnabled && virtualScrollState.startIndex > 0"
-            class="sm__virtual-spacer"
+            class="b__virtual-spacer"
           >
             <td
               :colspan="props.headers.length + leadingColCount"
@@ -158,11 +158,11 @@
             <tr v-bind="props.rowProps">
               <td
                 v-if="props.showExpand"
-                class="sm__expand-td"
+                class="b__expand-td"
               >
                 <button
-                  class="sm__expand-btn"
-                  :class="{ 'sm__expand-btn--expanded': isRowExpanded(item) }"
+                  class="b__expand-btn"
+                  :class="{ 'b__expand-btn--expanded': isRowExpanded(item) }"
                   @click="toggleExpand(item)"
                 >
                   <svg
@@ -170,24 +170,25 @@
                     viewBox="0 0 24 24"
                     width="16"
                     height="16"
+                    color="currentColor"
                     fill="none"
                     stroke="currentColor"
-                    stroke-width="2"
+                    stroke-width="1.5"
                     stroke-linecap="round"
                     stroke-linejoin="round"
                   >
-                    <polyline points="9 18 15 12 9 6"></polyline>
+                    <path d="M9.00005 6C9.00005 6 15 10.4189 15 12C15 13.5812 9 18 9 18"></path>
                   </svg>
                 </button>
               </td>
               <td
                 v-if="props.showSelect"
-                class="sm__select-td"
+                class="b__select-td"
               >
                 <input
-                  :id="`sm__table-checkbox-${item[props.itemKey]}`"
+                  :id="`b__table-checkbox-${item[props.itemKey]}`"
                   type="checkbox"
-                  class="sm__select-checkbox"
+                  class="b__select-checkbox"
                   :checked="checkedRows.includes(item)"
                   @change="toggleRowCheck(item)"
                 />
@@ -201,22 +202,22 @@
                   :name="`item.${header.key}`"
                   :item="item"
                   :index="isVirtualScrollEnabled ? virtualScrollState.startIndex + index : index"
-                  :value="item[header.key]"
+                  :value="getCellValue(item, header.key)"
                 >
-                  {{ item[header.key] }}
+                  {{ getCellValue(item, header.key) }}
                 </slot>
               </td>
             </tr>
             <tr
               v-if="props.showExpand && isRowExpanded(item)"
-              class="sm__expanded-row"
+              class="b__expanded-row"
             >
               <td
                 :colspan="props.headers.length + leadingColCount"
-                class="sm__expanded-row-cell"
+                class="b__expanded-row-cell"
               >
                 <slot
-                  name="sm-expanded-row"
+                  name="b-expanded-row"
                   :item="item"
                   :index="isVirtualScrollEnabled ? virtualScrollState.startIndex + index : index"
                 />
@@ -227,7 +228,7 @@
           <!-- Virtual scroll spacer (bottom) -->
           <tr
             v-if="isVirtualScrollEnabled && virtualScrollState.endIndex < processedItems.length"
-            class="sm__virtual-spacer"
+            class="b__virtual-spacer"
           >
             <td
               :colspan="props.headers.length + leadingColCount"
@@ -244,7 +245,7 @@
           <tr>
             <td
               :colspan="props.headers.length + leadingColCount"
-              class="sm__no-results-text"
+              class="b__no-results-text"
             >
               <slot name="no-results-text"> No results found </slot>
             </td>
@@ -402,17 +403,17 @@ function isSorted(columnKey) {
 function getSortIcon(columnKey) {
   const state = sortState.value[columnKey]
   if (state === 'asc') {
-    return { component: SortUpIcon, class: 'sm__sort-icon-active' }
+    return { component: SortUpIcon, class: 'b__sort-icon-active' }
   } else if (state === 'desc') {
-    return { component: SortDownIcon, class: 'sm__sort-icon-active' }
+    return { component: SortDownIcon, class: 'b__sort-icon-active' }
   }
-  return { component: SortIcon, class: 'sm__sort-icon-inactive' }
+  return { component: SortIcon, class: 'b__sort-icon-inactive' }
 }
 
 // Helper function to get header classes for a column
 function getHeaderClasses(column) {
   return {
-    sm__sortable: column.sortable,
+    b__sortable: column.sortable,
   }
 }
 
@@ -445,6 +446,15 @@ function toggleSort(columnKey) {
   }
 }
 
+// Resolve a header key against an item, supporting dot-notation paths (e.g. "branch.name").
+function getCellValue(item, key) {
+  if (item === null || key === null) return undefined
+  if (key in item) return item[key]
+  return String(key)
+    .split('.')
+    .reduce((acc, part) => (acc === null ? undefined : acc[part]), item)
+}
+
 // Computed property for filtered items (search)
 const filteredItems = computed(() => {
   if (!props.localSearch || !searchQuery.value.trim()) {
@@ -456,7 +466,7 @@ const filteredItems = computed(() => {
   return props.items.filter((item) => {
     // Search across all header keys
     return props.headers.some((header) => {
-      const value = item[header.key]
+      const value = getCellValue(item, header.key)
       if (value === null || value === undefined) return false
       return String(value).toLowerCase().includes(query)
     })
@@ -482,8 +492,8 @@ const sortedItems = computed(() => {
   const items = [...filteredItems.value]
 
   items.sort((a, b) => {
-    const aValue = a[sortColumn]
-    const bValue = b[sortColumn]
+    const aValue = getCellValue(a, sortColumn)
+    const bValue = getCellValue(b, sortColumn)
 
     // Handle null/undefined values
     if (aValue === null || aValue === undefined) return 1
@@ -615,7 +625,7 @@ $density-default-height: 50px;
 $density-comfortable-height: 42px;
 $density-compact-height: 34px;
 
-.sm__table-wrapper {
+.b__table-wrapper {
   width: 100%;
   position: relative;
   overflow-y: auto;
@@ -623,12 +633,12 @@ $density-compact-height: 34px;
 }
 
 // Search container
-.sm__search-container {
+.b__search-container {
   position: relative;
   padding: 12px;
 }
 
-.sm__search-input {
+.b__search-input {
   width: 100%;
   padding: 8px 36px 8px 36px;
   font-size: 13px;
@@ -638,7 +648,7 @@ $density-compact-height: 34px;
   background-color: transparent;
 }
 
-.sm__search-icon {
+.b__search-icon {
   position: absolute;
   left: 24px;
   top: 50%;
@@ -654,7 +664,7 @@ $density-compact-height: 34px;
   }
 }
 
-.sm__clear-icon {
+.b__clear-icon {
   position: absolute;
   right: 24px;
   top: 50%;
@@ -671,7 +681,7 @@ $density-compact-height: 34px;
   }
 }
 
-.sm__table {
+.b__table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
@@ -691,7 +701,7 @@ $density-compact-height: 34px;
   th {
     font-weight: normal;
 
-    &.sm__sortable {
+    &.b__sortable {
       cursor: pointer !important;
       user-select: none;
       transition: background-color $transition-duration ease;
@@ -700,7 +710,7 @@ $density-compact-height: 34px;
 }
 
 // Header content and sort icons
-.sm__header-content {
+.b__header-content {
   display: flex;
   align-items: center;
   justify-content: start;
@@ -708,7 +718,7 @@ $density-compact-height: 34px;
   white-space: nowrap;
 }
 
-.sm__sort-icon {
+.b__sort-icon {
   display: inline-flex;
   align-items: center;
   min-width: 14px;
@@ -721,52 +731,52 @@ $density-compact-height: 34px;
       opacity $transition-duration ease;
   }
 
-  .sm__sort-icon-inactive {
+  .b__sort-icon-inactive {
     opacity: 0.7;
   }
 
-  .sm__sort-icon-active {
+  .b__sort-icon-active {
     opacity: 1;
     color: darkorange;
   }
 }
 
 // Fixed header styles
-.sm__table-wrapper.sm__fixed-header .sm__table thead {
+.b__table-wrapper.b__fixed-header .b__table thead {
   position: sticky;
   top: 0;
   z-index: $sticky-z-index;
 }
 
 // Vertical borders between columns
-.sm__table-wrapper.sm__border-vertical {
-  .sm__table th {
+.b__table-wrapper.b__border-vertical {
+  .b__table th {
     &:not(:first-child) {
       border-left: 1px solid;
       border-right: 1px solid;
     }
   }
 
-  .sm__table td:not(:first-child) {
+  .b__table td:not(:first-child) {
     border-left: 1px solid;
     border-right: 1px solid;
   }
 }
 
 // Row hover functionality
-.sm__table-wrapper.sm__hover-enabled .sm__table tbody tr {
+.b__table-wrapper.b__hover-enabled .b__table tbody tr {
   transition: background-color $transition-duration ease;
 }
 
 // ============================================
 // LIGHT THEME
 // ============================================
-.sm__table-wrapper.sm__theme-light {
-  .sm__search-container {
+.b__table-wrapper.b__theme-light {
+  .b__search-container {
     border-bottom: 1px solid #ddd;
   }
 
-  .sm__search-input {
+  .b__search-input {
     border: 1px solid #ddd;
     color: rgba(0, 0, 0, 0.87);
 
@@ -779,11 +789,11 @@ $density-compact-height: 34px;
     }
   }
 
-  .sm__search-icon {
+  .b__search-icon {
     color: rgba(0, 0, 0, 0.4);
   }
 
-  .sm__clear-icon {
+  .b__clear-icon {
     color: rgba(0, 0, 0, 0.4);
 
     &:hover {
@@ -791,49 +801,49 @@ $density-compact-height: 34px;
     }
   }
 
-  .sm__table {
+  .b__table {
     th {
       background-color: #f5f5f5;
       color: #606060;
     }
   }
 
-  &.sm__border-horizontal .sm__table {
+  &.b__border-horizontal .b__table {
     th,
     td {
       border-bottom: 1px solid #ddd;
     }
   }
 
-  .sm__sort-icon {
+  .b__sort-icon {
     color: rgba(0, 0, 0, 0.6);
   }
 
-  &.sm__fixed-header .sm__table thead th {
+  &.b__fixed-header .b__table thead th {
     background-color: #f5f5f5;
   }
 
-  &.sm__fixed-header .sm__table thead td {
+  &.b__fixed-header .b__table thead td {
     background-color: #ffffff;
   }
 
-  &.sm__border-table {
+  &.b__border-table {
     border: 1px solid #ddd;
   }
 
-  &.sm__border-vertical {
-    .sm__table th:not(:first-child),
-    .sm__table td:not(:first-child) {
+  &.b__border-vertical {
+    .b__table th:not(:first-child),
+    .b__table td:not(:first-child) {
       border-left-color: #ddd;
       border-right-color: #ddd;
     }
   }
 
-  &.sm__hover-enabled .sm__table tbody tr:hover {
+  &.b__hover-enabled .b__table tbody tr:hover {
     background-color: rgba(0, 0, 0, 0.04);
   }
 
-  .sm__expand-btn:hover {
+  .b__expand-btn:hover {
     background-color: rgba(0, 0, 0, 0.08);
   }
 }
@@ -841,12 +851,12 @@ $density-compact-height: 34px;
 // ============================================
 // DARK THEME
 // ============================================
-.sm__table-wrapper.sm__theme-dark {
-  .sm__search-container {
+.b__table-wrapper.b__theme-dark {
+  .b__search-container {
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   }
 
-  .sm__search-input {
+  .b__search-input {
     border: 1px solid rgba(255, 255, 255, 0.12);
     color: rgba(255, 255, 255, 0.87);
 
@@ -859,11 +869,11 @@ $density-compact-height: 34px;
     }
   }
 
-  .sm__search-icon {
+  .b__search-icon {
     color: rgba(255, 255, 255, 0.4);
   }
 
-  .sm__clear-icon {
+  .b__clear-icon {
     color: rgba(255, 255, 255, 0.4);
 
     &:hover {
@@ -871,117 +881,117 @@ $density-compact-height: 34px;
     }
   }
 
-  .sm__table {
+  .b__table {
     th {
-      background-color: var(--sm-table-header-bg);
+      background-color: var(--b-table-header-bg);
       color: #dddddd;
     }
   }
 
-  &.sm__border-horizontal .sm__table {
+  &.b__border-horizontal .b__table {
     th,
     td {
       border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     }
   }
 
-  .sm__sort-icon {
+  .b__sort-icon {
     color: rgba(255, 255, 255, 0.7);
   }
 
-  &.sm__fixed-header .sm__table thead th {
-    background-color: var(--sm-table-header-bg);
+  &.b__fixed-header .b__table thead th {
+    background-color: var(--b-table-header-bg);
   }
 
-  &.sm__border-table {
+  &.b__border-table {
     border: 1px solid rgba(255, 255, 255, 0.12);
   }
 
-  &.sm__border-vertical {
-    .sm__table th:not(:first-child),
-    .sm__table td:not(:first-child) {
+  &.b__border-vertical {
+    .b__table th:not(:first-child),
+    .b__table td:not(:first-child) {
       border-left-color: rgba(255, 255, 255, 0.12);
       border-right-color: rgba(255, 255, 255, 0.12);
     }
   }
 
-  &.sm__hover-enabled .sm__table tbody tr:hover {
+  &.b__hover-enabled .b__table tbody tr:hover {
     background-color: rgba(255, 255, 255, 0.08);
   }
 
-  .sm__expand-btn:hover {
+  .b__expand-btn:hover {
     background-color: rgba(255, 255, 255, 0.1);
   }
 }
 
 // Density styles
-.sm__table-wrapper.sm__density-default .sm__table {
+.b__table-wrapper.b__density-default .b__table {
   th,
   td {
     height: $density-default-height;
   }
 }
 
-.sm__table-wrapper.sm__density-comfortable .sm__table {
+.b__table-wrapper.b__density-comfortable .b__table {
   th,
   td {
     height: $density-comfortable-height;
   }
 }
 
-.sm__table-wrapper.sm__density-compact .sm__table {
+.b__table-wrapper.b__density-compact .b__table {
   th,
   td {
     height: $density-compact-height;
   }
 }
 
-.sm__no-results-text {
+.b__no-results-text {
   text-align: center !important;
   opacity: 0.8;
   border: none !important;
 }
 
 // Loading state styles
-.sm__tbody-disabled {
+.b__tbody-disabled {
   pointer-events: none;
   opacity: 0.6;
   user-select: none;
 }
-.sm__thead-disabled {
+.b__thead-disabled {
   pointer-events: none;
   // opacity: 0.6;
   user-select: none;
   cursor: progress;
 }
 
-.sm__loading-cell {
+.b__loading-cell {
   padding: 0 !important;
   border: none !important;
   height: 4px !important;
 }
 
-.sm__loading-container {
+.b__loading-container {
   width: 100%;
   height: 4px;
 }
 
 // Loading overlay (when there are existing records)
-.sm__loading-overlay-row {
+.b__loading-overlay-row {
   position: sticky;
   // top: $density-default-height;
   z-index: 5;
 }
 
-.sm__table-wrapper.sm__density-comfortable .sm__loading-overlay-row {
+.b__table-wrapper.b__density-comfortable .b__loading-overlay-row {
   top: $density-comfortable-height;
 }
 
-.sm__table-wrapper.sm__density-compact .sm__loading-overlay-row {
+.b__table-wrapper.b__density-compact .b__loading-overlay-row {
   top: $density-compact-height;
 }
 
-.sm__loading-overlay-cell {
+.b__loading-overlay-cell {
   padding: 0 !important;
   border: none !important;
   height: 0px !important;
@@ -989,8 +999,8 @@ $density-compact-height: 34px;
 }
 
 // Linear progress bar - Light theme
-.sm__table-wrapper.sm__theme-light {
-  .sm__loading-progress-bar {
+.b__table-wrapper.b__theme-light {
+  .b__loading-progress-bar {
     position: absolute;
     width: 100%;
     height: 2px;
@@ -998,17 +1008,17 @@ $density-compact-height: 34px;
     overflow: hidden;
   }
 
-  .sm__loading-progress-indicator {
+  .b__loading-progress-indicator {
     height: 100%;
     width: 60%;
     background: linear-gradient(90deg, transparent 0%, #000000 40%, transparent 100%);
-    animation: sm__progress-slide 1.5s ease-in-out infinite;
+    animation: b__progress-slide 1.5s ease-in-out infinite;
   }
 }
 
 // Linear progress bar - Dark theme
-.sm__table-wrapper.sm__theme-dark {
-  .sm__loading-progress-bar {
+.b__table-wrapper.b__theme-dark {
+  .b__loading-progress-bar {
     position: absolute;
     width: 100%;
     height: 2px;
@@ -1016,15 +1026,15 @@ $density-compact-height: 34px;
     overflow: hidden;
   }
 
-  .sm__loading-progress-indicator {
+  .b__loading-progress-indicator {
     height: 100%;
     width: 60%;
     background: linear-gradient(90deg, transparent 0%, #ffffff 30%, transparent 100%);
-    animation: sm__progress-slide 1.5s ease-in-out infinite;
+    animation: b__progress-slide 1.5s ease-in-out infinite;
   }
 }
 
-@keyframes sm__progress-slide {
+@keyframes b__progress-slide {
   0% {
     transform: translateX(-100%);
   }
@@ -1034,7 +1044,7 @@ $density-compact-height: 34px;
 }
 
 // Virtual scroll styles
-.sm__virtual-spacer {
+.b__virtual-spacer {
   td {
     padding: 0 !important;
     border: none !important;
@@ -1042,19 +1052,19 @@ $density-compact-height: 34px;
 }
 
 // Virtual scroll enabled wrapper - ensure smooth scrolling
-.sm__table-wrapper.sm__virtual-scroll-enabled {
+.b__table-wrapper.b__virtual-scroll-enabled {
   will-change: scroll-position;
 }
 
 // Expand column styles
-.sm__expand-th,
-.sm__expand-td {
+.b__expand-th,
+.b__expand-td {
   width: 25px;
   min-width: 25px;
   padding: 0 4px !important;
 }
 
-.sm__expand-btn {
+.b__expand-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1080,14 +1090,14 @@ $density-compact-height: 34px;
   }
 }
 
-.sm__expanded-row-cell {
+.b__expanded-row-cell {
   padding: 0 !important;
   border-top: none !important;
 }
 
 // Select column styles
-.sm__select-th,
-.sm__select-td {
+.b__select-th,
+.b__select-td {
   width: auto;
   text-align: center;
 }
@@ -1098,8 +1108,8 @@ $density-compact-height: 34px;
 // These styles will apply even when using custom header slots
 // ============================================
 
-.sm__table-wrapper {
-  .sm__table {
+.b__table-wrapper {
+  .b__table {
     thead {
       th {
         font-weight: normal;
@@ -1108,14 +1118,14 @@ $density-compact-height: 34px;
         height: 52px;
         font-size: 13px !important;
 
-        &.sm__sortable {
+        &.b__sortable {
           cursor: pointer !important;
           user-select: none;
           transition: background-color 0.12s ease;
         }
       }
 
-      .sm__header-content {
+      .b__header-content {
         display: flex;
         align-items: center;
         justify-content: start;
@@ -1123,7 +1133,7 @@ $density-compact-height: 34px;
         white-space: nowrap;
       }
 
-      .sm__sort-icon {
+      .b__sort-icon {
         display: inline-flex;
         align-items: center;
         min-width: 14px;
@@ -1136,11 +1146,11 @@ $density-compact-height: 34px;
             opacity 0.12s ease;
         }
 
-        .sm__sort-icon-inactive {
+        .b__sort-icon-inactive {
           opacity: 0.7;
         }
 
-        .sm__sort-icon-active {
+        .b__sort-icon-active {
           opacity: 1;
           color: darkorange;
         }
@@ -1149,23 +1159,23 @@ $density-compact-height: 34px;
   }
 
   // Density variations
-  &.sm__density-comfortable .sm__table thead th {
+  &.b__density-comfortable .b__table thead th {
     height: 44px;
   }
 
-  &.sm__density-compact .sm__table thead th {
+  &.b__density-compact .b__table thead th {
     height: 36px;
   }
 
   // Fixed header
-  &.sm__fixed-header .sm__table thead {
+  &.b__fixed-header .b__table thead {
     position: sticky;
     top: 0;
     z-index: 10;
   }
 
   // Vertical borders between columns (header)
-  &.sm__border-vertical .sm__table thead th {
+  &.b__border-vertical .b__table thead th {
     &:not(:first-child) {
       border-left: 1px solid;
       border-right: 1px solid;
@@ -1176,30 +1186,30 @@ $density-compact-height: 34px;
 // ============================================
 // LIGHT THEME (non-scoped)
 // ============================================
-.sm__table-wrapper.sm__theme-light {
-  --sm-dropdown-bg: rgb(255, 255, 255);
-  --sm-dropdown-border: rgba(0, 0, 0, 0.12);
-  --sm-dropdown-text: inherit;
-  --sm-dropdown-hover: rgba(0, 0, 0, 0.05);
-  --sm-input-color: rgb(51, 51, 51);
-  --sm-input-placeholder: rgba(0, 0, 0, 0.35);
-  --sm-color-blue: rgb(33, 150, 243);
-  --sm-active-filter-bg-color: rgba(251, 140, 0, 0.184);
-  --sm-table-header-bg: rgba(245, 245, 245, 1);
+.b__table-wrapper.b__theme-light {
+  --b-dropdown-bg: rgb(255, 255, 255);
+  --b-dropdown-border: rgba(0, 0, 0, 0.07);
+  --b-dropdown-text: inherit;
+  --b-dropdown-hover: rgba(0, 0, 0, 0.05);
+  --b-input-color: rgb(51, 51, 51);
+  --b-input-placeholder: rgba(0, 0, 0, 0.35);
+  --b-color-blue: rgb(0, 122, 255);
+  --b-active-filter-bg-color: rgba(251, 140, 0, 0.184);
+  --b-table-header-bg: rgba(245, 245, 245, 1);
 }
 
-.sm__table-wrapper.sm__theme-light .sm__table thead {
+.b__table-wrapper.b__theme-light .b__table thead {
   th {
     background-color: #f5f5f5;
     color: #606060;
   }
 
-  .sm__sort-icon {
+  .b__sort-icon {
     color: rgba(0, 0, 0, 0.6);
   }
 }
 
-.sm__table-wrapper.sm__theme-light.sm__border-horizontal .sm__table thead {
+.b__table-wrapper.b__theme-light.b__border-horizontal .b__table thead {
   th {
     border-bottom: 1px solid #ddd;
   }
@@ -1208,14 +1218,14 @@ $density-compact-height: 34px;
   }
 }
 
-.sm__table-wrapper.sm__theme-light.sm__fixed-header .sm__table thead th {
+.b__table-wrapper.b__theme-light.b__fixed-header .b__table thead th {
   background-color: #f5f5f5;
 }
-.sm__table-wrapper.sm__theme-light.sm__fixed-header .sm__table thead td {
+.b__table-wrapper.b__theme-light.b__fixed-header .b__table thead td {
   background-color: #ffffff;
 }
 
-.sm__table-wrapper.sm__theme-light.sm__border-vertical .sm__table thead th:not(:first-child) {
+.b__table-wrapper.b__theme-light.b__border-vertical .b__table thead th:not(:first-child) {
   border-left-color: #ddd;
   border-right-color: #ddd;
 }
@@ -1223,21 +1233,21 @@ $density-compact-height: 34px;
 // ============================================
 // DARK THEME (non-scoped)
 // ============================================
-.sm__table-wrapper.sm__theme-dark {
-  --sm-dropdown-bg: rgba(42, 42, 42, 1);
-  --sm-dropdown-border: rgba(255, 255, 255, 0.12);
-  --sm-dropdown-text: rgba(235, 235, 235, 0.9);
-  --sm-dropdown-hover: rgba(255, 255, 255, 0.08);
-  --sm-input-color: rgba(221, 221, 221, 1);
-  --sm-input-placeholder: rgba(255, 255, 255, 0.35);
-  --sm-color-blue: rgba(33, 150, 243, 1);
-  --sm-active-filter-bg-color: rgba(251, 140, 0, 0.184);
-  --sm-table-header-bg: rgba(45, 45, 45, 1);
+.b__table-wrapper.b__theme-dark {
+  --b-dropdown-bg: rgba(42, 42, 42, 1);
+  --b-dropdown-border: rgba(255, 255, 255, 0.07);
+  --b-dropdown-text: rgba(235, 235, 235, 0.9);
+  --b-dropdown-hover: rgba(255, 255, 255, 0.08);
+  --b-input-color: rgba(221, 221, 221, 1);
+  --b-input-placeholder: rgba(255, 255, 255, 0.35);
+  --b-color-blue: rgba(0, 122, 255);
+  --b-active-filter-bg-color: rgba(251, 140, 0, 0.184);
+  --b-table-header-bg: rgba(45, 45, 45, 1);
 }
 
-.sm__table-wrapper.sm__theme-dark .sm__table thead {
+.b__table-wrapper.b__theme-dark .b__table thead {
   th {
-    background-color: var(--sm-table-header-bg);
+    background-color: var(--b-table-header-bg);
     color: #dddddd;
   }
   td {
@@ -1245,12 +1255,12 @@ $density-compact-height: 34px;
     color: #dddddd;
   }
 
-  .sm__sort-icon {
+  .b__sort-icon {
     color: rgba(255, 255, 255, 0.7);
   }
 }
 
-.sm__table-wrapper.sm__theme-dark.sm__border-horizontal .sm__table thead {
+.b__table-wrapper.b__theme-dark.b__border-horizontal .b__table thead {
   th {
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   }
@@ -1259,20 +1269,20 @@ $density-compact-height: 34px;
   }
 }
 
-.sm__table-wrapper.sm__theme-dark.sm__fixed-header .sm__table thead th {
-  background-color: var(--sm-table-header-bg);
+.b__table-wrapper.b__theme-dark.b__fixed-header .b__table thead th {
+  background-color: var(--b-table-header-bg);
 }
 
-.sm__table-wrapper.sm__theme-dark.sm__border-vertical .sm__table thead th:not(:first-child) {
+.b__table-wrapper.b__theme-dark.b__border-vertical .b__table thead th:not(:first-child) {
   border-left-color: rgba(255, 255, 255, 0.12);
   border-right-color: rgba(255, 255, 255, 0.12);
 }
 
-.sm__sticky-table-footer {
+.b__sticky-table-footer {
   position: sticky;
   bottom: 0;
   font-size: 13px;
-  background-color: var(--sm-table-header-bg);
+  background-color: var(--b-table-header-bg);
 
   td {
     padding: 0 8px;
@@ -1280,24 +1290,24 @@ $density-compact-height: 34px;
   }
 }
 
-.sm__table-wrapper.sm__density-comfortable .sm__sticky-table-footer td {
+.b__table-wrapper.b__density-comfortable .b__sticky-table-footer td {
   height: 42px;
 }
 
-.sm__table-wrapper.sm__density-compact .sm__sticky-table-footer td {
+.b__table-wrapper.b__density-compact .b__sticky-table-footer td {
   height: 34px;
 }
 
 // ============================================
 // Checkbox styles (non-scoped — applies to slotted content too)
 // ============================================
-.sm__select-th,
-.sm__select-td {
+.b__select-th,
+.b__select-td {
   width: auto;
   text-align: center;
 }
 
-.sm__select-checkbox {
+.b__select-checkbox {
   cursor: pointer;
   width: 15px;
   height: 15px;
@@ -1315,7 +1325,7 @@ $density-compact-height: 34px;
     border-color 0.12s ease;
 }
 
-.sm__table-wrapper.sm__theme-light .sm__select-checkbox {
+.b__table-wrapper.b__theme-light .b__select-checkbox {
   border-color: rgba(0, 0, 0, 0.35);
 
   &:hover:not(:checked):not(:indeterminate) {
@@ -1337,7 +1347,7 @@ $density-compact-height: 34px;
   }
 }
 
-.sm__table-wrapper.sm__theme-dark .sm__select-checkbox {
+.b__table-wrapper.b__theme-dark .b__select-checkbox {
   border-color: rgba(255, 255, 255, 0.35);
 
   &:hover:not(:checked):not(:indeterminate) {

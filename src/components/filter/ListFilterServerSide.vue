@@ -8,7 +8,7 @@
           hide-details
           readonly
           :bg-color="selectedItems.length > 0 ? '#fb8c002f' : ''"
-          class="sm-filter-field"
+          class="b-filter-field"
           variant="underlined"
           append-inner-icon="mdi-chevron-down"
           v-bind="props"

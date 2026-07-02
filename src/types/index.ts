@@ -12,34 +12,36 @@ export interface TableHeader {
   key: string
   sortable: boolean
   column?: string
-  filterType?: 'number' | 'text' | 'list'
+  filterType?: 'number' | 'text' | 'list' | 'id'
   list?: Array<object>
   align?: 'start' | 'center' | 'end'
   headerProps?: object
   cellProps?: object
   complex?: boolean
   columns?: Array<string>
+  itemTitle?: string
+  itemValue?: string
 }
 
 export interface TableResult {
-  data: Array<object>
-  total: number
+  results: Array<object>
+  count: number
+  previous?: string | null
+  next?: string | null
   footer?: Record<string, number | string>
-  prev_page_url?: string
-  next_page_url?: string
 }
 
-export interface SmTableSort {
+export interface BTableSort {
   column?: string
   direction?: 'asc' | 'desc'
 }
 
-export interface SmTablePerPage {
+export interface BTablePerPage {
   page: number
   perPage: number
 }
 
-export interface SmTableTextFilter {
+export interface BTableTextFilter {
   column: string
   symbol: string
   value: string
@@ -47,7 +49,7 @@ export interface SmTableTextFilter {
   complex?: boolean
 }
 
-export interface SmTableNumberFilter {
+export interface BTableNumberFilter {
   column: string
   symbol: string
   value: string
@@ -55,20 +57,21 @@ export interface SmTableNumberFilter {
   complex?: boolean
 }
 
-export interface SmTableListFilter {
+export interface BTableListFilter {
   column: string
   values: unknown[]
 }
 
-export default interface SmDatatableProps {
+export default interface BDatatableProps {
   hover?: boolean
   density?: 'default' | 'comfortable' | 'compact'
   title?: string | null
   headers?: Array<TableHeader>
   bodySlots?: Array<string>
-  results?: TableResult
+  apiData?: TableResult
   page?: number
   perPage?: number
+  pageCount?: number
   perPageOptions?: Array<number>
   height?: string | null
   showTotals?: boolean

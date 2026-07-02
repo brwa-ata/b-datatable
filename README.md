@@ -1,9 +1,9 @@
-# sm-datatable
+# b-datatable
 
 ## Installation + Update
 
 ```
-npm install git+https://github.com/smartmedapp/sm-datatable.git --force
+npm install git+https://github.com/brwa-ata/b-datatable.git --force
 ```
 
 after this command you should restart the vue dev server
@@ -13,9 +13,9 @@ after this command you should restart the vue dev server
 | simple table with local sort, filter and search
 
 ```
-import { SmTable } from 'sm-datatable'
+import { BTable } from 'b-datatable'
 
-<SmTable
+<BTable
   :headers="datatable.headers"
   :items="results.data"
   fixed-header
@@ -116,7 +116,7 @@ Follow these steps to fix it using a GitHub Deploy Key.
 ## Step 1: Generate an SSH Key on Your Server
 
 ```bash
-ssh-keygen ~/.ssh/sm-datatable
+ssh-keygen ~/.ssh/b-datatable
 ```
 
 ## Step 2: Add the Public Key to GitHub
@@ -124,10 +124,10 @@ ssh-keygen ~/.ssh/sm-datatable
 Copy the public key:
 
 ```bash
-cat ~/.ssh/sm-datatable.pub
+cat ~/.ssh/b-datatable.pub
 ```
 
-Then go to **GitHub → `sm-datatable` repo → Settings → Deploy keys → Add deploy key**, paste the key, and save. Read-only access is sufficient.
+Then go to **GitHub → `b-datatable` repo → Settings → Deploy keys → Add deploy key**, paste the key, and save. Read-only access is sufficient.
 
 ## Step 3: Configure SSH to Use the Deploy Key
 
@@ -137,7 +137,7 @@ Add the following to `~/.ssh/config` (create it if it doesn't exist):
 Host github.com
     HostName github.com
     User git
-    IdentityFile ~/.ssh/sm-datatable
+    IdentityFile ~/.ssh/b-datatable
     IdentitiesOnly yes
 ```
 
@@ -150,7 +150,7 @@ ssh -T git@github.com
 Expected output:
 
 ```
-Hi smartmedapp/sm-datatable! You've successfully authenticated...
+Hi brwa-ata/b-datatable! You've successfully authenticated...
 ```
 
 ## Step 5: Run npm install

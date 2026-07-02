@@ -1,4 +1,4 @@
-// Self-contained SVG icons for sm-datatable
+// Self-contained SVG icons for b-datatable
 // These icons are embedded directly so no external dependencies are required
 
 import { h } from 'vue'

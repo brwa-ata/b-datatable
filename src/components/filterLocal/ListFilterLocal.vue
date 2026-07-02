@@ -39,22 +39,31 @@
     >
       <!-- toolbar -->
       <div class="lfl__toolbar">
-        <div class="lfl__radios">
-          <label class="lfl__radio-label">
+        <div
+          class="lfl__segment"
+          role="radiogroup"
+        >
+          <label
+            class="lfl__seg"
+            :class="{ 'lfl__seg--active': lookup === 'in' }"
+          >
             <input
               v-model="lookup"
               type="radio"
               value="in"
-              class="lfl__radio"
+              class="lfl__seg-input"
             />
             In
           </label>
-          <label class="lfl__radio-label">
+          <label
+            class="lfl__seg"
+            :class="{ 'lfl__seg--active': lookup === 'not_in' }"
+          >
             <input
               v-model="lookup"
               type="radio"
               value="not_in"
-              class="lfl__radio"
+              class="lfl__seg-input"
             />
             Not In
           </label>
@@ -100,14 +109,19 @@
             <svg
               v-if="selected.has(value)"
               xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
               width="18"
               height="18"
-              fill="currentColor"
-              viewBox="0 0 16 16"
+              color="currentColor"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             >
               <path
-                d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"
-              />
+                d="M5 13.2592L7.58583 15.9568C8.2525 16.6523 8.58583 17.0001 9.00004 17.0001C9.41425 17.0001 9.74759 16.6523 10.4143 15.9568L19 7.00006"
+              ></path>
             </svg>
           </span>
           {{ value }}
@@ -241,7 +255,7 @@ function applyFilter() {
 
     &::placeholder {
       font-size: 13px;
-      color: var(--sm-input-placeholder);
+      color: var(--b-input-placeholder);
     }
   }
 
@@ -252,8 +266,8 @@ function applyFilter() {
     z-index: 1000;
     min-width: 240px;
     max-width: 300px;
-    background-color: var(--sm-dropdown-bg, #fff);
-    border: 1px solid var(--sm-dropdown-border, rgba(0, 0, 0, 0.12));
+    background-color: var(--b-dropdown-bg, #fff);
+    border: 1px solid var(--b-dropdown-border, rgba(0, 0, 0, 0.12));
     border-radius: 6px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     overflow: hidden;
@@ -264,30 +278,62 @@ function applyFilter() {
     align-items: center;
     justify-content: space-between;
     padding: 8px 10px;
-    border-bottom: 1px solid var(--sm-dropdown-border, rgba(0, 0, 0, 0.1));
+    border-bottom: 1px solid var(--b-dropdown-border, rgba(0, 0, 0, 0.1));
   }
 
-  &__radios {
-    display: flex;
+  &__segment {
+    display: inline-flex;
     align-items: center;
-    gap: 10px;
+    padding: 2px;
+    background-color: rgba(118, 118, 128, 0.12);
+    border-radius: 8px;
+
+    .b__theme-dark & {
+      background-color: rgba(118, 118, 128, 0.24);
+    }
   }
 
-  &__radio-label {
-    display: flex;
+  &__seg-input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &__seg {
+    display: inline-flex;
     align-items: center;
-    gap: 4px;
+    justify-content: center;
+    padding: 3px 14px;
     font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    border-radius: 6px;
     cursor: pointer;
-    color: var(--sm-dropdown-text, inherit);
     white-space: nowrap;
-  }
+    user-select: none;
+    color: var(--b-dropdown-text, inherit);
+    transition:
+      background-color 0.2s ease,
+      box-shadow 0.2s ease,
+      color 0.2s ease;
 
-  &__radio {
-    width: 14px;
-    height: 14px;
-    cursor: pointer;
-    accent-color: var(--sm-color-blue);
+    &--active {
+      background-color: #fff;
+      color: #000;
+      box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.12),
+        0 1px 1px rgba(0, 0, 0, 0.08);
+
+      .b__theme-dark & {
+        background-color: #636366;
+        color: #fff;
+        box-shadow:
+          0 1px 3px rgba(0, 0, 0, 0.3),
+          0 1px 1px rgba(0, 0, 0, 0.2);
+      }
+    }
   }
 
   &__actions {
@@ -306,7 +352,7 @@ function applyFilter() {
 
     &--clear {
       background-color: transparent;
-      color: var(--sm-dropdown-text, inherit);
+      color: var(--b-dropdown-text, inherit);
 
       &:hover {
         background-color: rgba(0, 0, 0, 0.09);
@@ -314,8 +360,8 @@ function applyFilter() {
     }
 
     &--apply {
-      background-color: var(--sm-dropdown-hover, rgba(0, 0, 0, 1));
-      color: var(--sm-dropdown-text, inherit);
+      background-color: var(--b-dropdown-hover, rgba(0, 0, 0, 1));
+      color: var(--b-dropdown-text, inherit);
 
       &:hover {
         background-color: rgba(0, 0, 0, 0.15);
@@ -325,7 +371,7 @@ function applyFilter() {
 
   &__search-wrap {
     padding: 8px 10px;
-    border-bottom: 1px solid var(--sm-dropdown-border, rgba(0, 0, 0, 0.1));
+    border-bottom: 1px solid var(--b-dropdown-border, rgba(0, 0, 0, 0.1));
   }
 
   &__search-input {
@@ -334,17 +380,17 @@ function applyFilter() {
     padding: 0 8px;
     font-size: 12px;
     outline: none;
-    border: 1px solid var(--sm-dropdown-border, rgba(0, 0, 0, 0.2));
+    border: 1px solid var(--b-dropdown-border, rgba(0, 0, 0, 0.2));
     border-radius: 6px;
     background: transparent;
-    color: var(--sm-dropdown-text, inherit);
+    color: var(--b-dropdown-text, inherit);
 
     &::placeholder {
       opacity: 0.8;
     }
 
     &:focus {
-      border: 1px solid var(--sm-color-blue);
+      border: 1px solid var(--b-color-blue);
     }
   }
 
@@ -363,10 +409,10 @@ function applyFilter() {
     cursor: pointer;
     user-select: none;
     white-space: nowrap;
-    color: var(--sm-dropdown-text, inherit);
+    color: var(--b-dropdown-text, inherit);
 
     &:hover {
-      background-color: var(--sm-dropdown-hover, rgba(0, 0, 0, 0.05));
+      background-color: var(--b-dropdown-hover, rgba(0, 0, 0, 0.05));
     }
   }
 
@@ -376,14 +422,14 @@ function applyFilter() {
     justify-content: center;
     width: 22px;
     flex-shrink: 0;
-    color: var(--sm-color-blue);
+    color: var(--b-color-blue);
   }
 
   &__empty {
     padding: 12px 10px;
     font-size: 13px;
     text-align: center;
-    color: var(--sm-input-placeholder);
+    color: var(--b-input-placeholder);
   }
 }
 </style>

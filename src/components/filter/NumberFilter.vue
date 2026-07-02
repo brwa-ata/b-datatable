@@ -69,7 +69,104 @@
               type="button"
               :class="{ 'nf__dropdown-item--active': option.value === symbol }"
             >
-              {{ option.title }}
+              <span class="nf__dropdown-label">{{ option.label }}</span>
+              <span class="nf__dropdown-icon">
+                <svg
+                  v-if="option.value === '__eq'"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  color="currentColor"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                >
+                  <path d="M4 8H20"></path>
+                  <path d="M4 16H20"></path>
+                </svg>
+                <svg
+                  v-else-if="option.value === '__gt'"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  color="currentColor"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M7 4L15.3306 10.0405C17.5565 11.6545 17.5565 12.3455 15.3306 13.9595L7 20"></path>
+                </svg>
+                <svg
+                  v-else-if="option.value === '__gte'"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  color="currentColor"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                >
+                  <path d="M21 20H3"></path>
+                  <path
+                    d="M3 16H17.1622C19.5429 16 20.7332 16 20.9652 15.3728C21.1971 14.7455 20.2628 14.0531 18.3943 12.6682L6.69853 4"
+                  ></path>
+                </svg>
+                <svg
+                  v-else-if="option.value === '__lt'"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  color="currentColor"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M17 4L8.66943 10.0405C6.44352 11.6545 6.44353 12.3455 8.66943 13.9595L17 20"></path>
+                </svg>
+                <svg
+                  v-else-if="option.value === '__lte'"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  color="currentColor"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                >
+                  <path d="M3 20H21"></path>
+                  <path
+                    d="M21 16H6.83782C4.45713 16 3.26678 16 3.03483 15.3728C2.80288 14.7455 3.73716 14.0531 5.60572 12.6682L17.3015 4"
+                  ></path>
+                </svg>
+                <svg
+                  v-else-if="option.value === '__not_eq'"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  color="currentColor"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                >
+                  <path d="M4 8H20"></path>
+                  <path d="M4 16H20"></path>
+                  <path d="M6 20L18 4"></path>
+                </svg>
+              </span>
             </button>
           </li>
         </ul>
@@ -129,12 +226,12 @@ const symbol = ref('__eq')
 const searchValue = ref<string | number | null>(null)
 const filterApplied = ref(false)
 const numberFilterOptions = ref([
-  { title: 'Equal (=)', value: '__eq' },
-  { title: 'Greater than (>)', value: '__gt' },
-  { title: 'Greater than or Equal (>=)', value: '__gte' },
-  { title: 'Less than (<)', value: '__lt' },
-  { title: 'Less than or Equal (<=)', value: '__lte' },
-  { title: 'Not Equal (!=)', value: '__not_eq' },
+  { label: 'Equal', value: '__eq' },
+  { label: 'Greater than', value: '__gt' },
+  { label: 'Greater than or Equal', value: '__gte' },
+  { label: 'Less than', value: '__lt' },
+  { label: 'Less than or Equal', value: '__lte' },
+  { label: 'Not Equal', value: '__not_eq' },
 ])
 const mathSymbols = ref([
   { key: '__eq', value: '=' },
@@ -235,33 +332,45 @@ function onlyNumber(val: string | number | null): number | string | null {
     z-index: 1000;
     min-width: 180px;
     margin: 0;
-    padding: 4px 0;
+    padding: 4px 6px;
     list-style: none;
-    background-color: var(--sm-dropdown-bg, #fff);
-    border: 1px solid var(--sm-dropdown-border, rgba(0, 0, 0, 0.12));
-    border-radius: 6px;
+    background-color: transparent;
+    backdrop-filter: blur(25px);
+    border: 1px solid var(--b-dropdown-border, rgba(0, 0, 0, 0.07));
+    border-radius: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
   &__dropdown-item {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     width: 100%;
     padding: 6px 14px;
+    border-radius: 8px;
     background: transparent;
     border: none;
     text-align: left;
-    font-size: 0.875rem;
+    font-size: 0.775rem;
     cursor: pointer;
-    color: var(--sm-dropdown-text, inherit);
+    color: var(--b-dropdown-text, inherit);
     white-space: nowrap;
 
     &:hover {
-      background-color: var(--sm-dropdown-hover, rgba(0, 0, 0, 0.05));
+      background-color: var(--b-dropdown-hover, rgba(0, 0, 0, 0.05));
     }
 
     &--active {
-      color: var(--sm-color-blue);
+      color: var(--b-color-blue);
     }
+  }
+
+  &__dropdown-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
 
   &__input {
@@ -270,10 +379,10 @@ function onlyNumber(val: string | number | null): number | string | null {
     outline: none;
     border: none;
     background: transparent;
-    color: var(--sm-input-color, inherit);
+    color: var(--b-input-color, inherit);
 
     &::placeholder {
-      color: var(--sm-input-placeholder);
+      color: var(--b-input-placeholder);
     }
   }
 

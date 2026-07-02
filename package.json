@@ -1,16 +1,16 @@
 {
-  "name": "sm-datatable",
+  "name": "b-datatable",
   "version": "1.2.17",
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/sm-datatable.js",
-      "require": "./dist/sm-datatable.umd.cjs"
+      "import": "./dist/b-datatable.js",
+      "require": "./dist/b-datatable.umd.cjs"
     },
-    "./style.css": "./dist/sm-datatable.css"
+    "./style.css": "./dist/b-datatable.css"
   },
-  "main": "./dist/sm-datatable.umd.cjs",
-  "module": "./dist/sm-datatable.js",
+  "main": "./dist/b-datatable.umd.cjs",
+  "module": "./dist/b-datatable.js",
   "files": [
     "dist"
   ],
@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/smartmedapp/sm-datatable.git"
+    "url": "git+https://github.com/brwa-ata/b-datatable.git"
   },
   "scripts": {
     "dev": "vite",

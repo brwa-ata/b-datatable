@@ -1,159 +1,382 @@
+<template>
+  <div class="b--main-container">
+    <div style="margin-bottom: 0rem; display: flex; align-items: center; gap: 12px">
+      <div style="font-size: 28px">Sales</div>
+      <button
+        type="button"
+        class="theme-btn"
+        @click="changeTheme()"
+      >
+        Dark/Light
+      </button>
+    </div>
+
+    <BDatatable
+      ref="tableRef"
+      :loading="loading"
+      :page="queryParams.page"
+      :per-page="queryParams.page_size"
+      :page-count="pageCount"
+      :api-data="apiData"
+      :headers="headers"
+      :body-slots="bodySlots"
+      fixed-header
+      :border="{
+        table: true,
+        tableBorderRadius: '0.5rem',
+      }"
+      height="600px"
+      hover
+      show-totals
+      show-expand
+      :theme="theme"
+      density="compact"
+      :use-virtual-scroll="true"
+      store-table-header-in-local-storage
+      table-header-local-storage-name="my-stock-header"
+      show-select
+      @click:export-to-excel="handleExportToExcel()"
+      @click:reset="handleReset()"
+      @click:search="handleSearch()"
+      @click:print="handlePrint()"
+      @update:text-filter="handleUpdateTextFilter"
+      @update:number-filter="handleUpdateNumberFilter"
+      @update:list-filter="handleUpdateListFilter"
+      @update:sort="handleUpdateSort"
+      @update:prev-page="handleUpdatePrevPage"
+      @update:next-page="handleUpdateNextPage"
+      @update:per-page="handleUpdatePerPage"
+      @update:checked="handleUpdateChecked"
+    >
+      <template #invoice_no="{ item }">
+        <span style="color: #2196f3">{{ item.invoice_no }}</span>
+      </template>
+
+      <template #is_cash="{ item }">
+        <span
+          v-if="item.is_cash"
+          style="color: #2196f3"
+        >
+          Cash
+        </span>
+        <span
+          v-else
+          style="color: #ff5252"
+        >
+          Debit
+        </span>
+      </template>
+
+      <template #total_price="{ item }">
+        <span>{{ Number(item.total_price).toLocaleString('en-us') }}</span>
+      </template>
+      <template #net_price="{ item }">
+        <span>{{ Number(item.net_price).toLocaleString('en-us') }}</span>
+      </template>
+      <template #net_price_fc="{ item }">
+        <span>{{ Number(item.net_price_fc).toLocaleString('en-us') }}</span>
+      </template>
+      <template #total_quantity="{ item }">
+        <span>{{ Number(item.total_quantity).toLocaleString('en-us') }}</span>
+      </template>
+      <template #total_bonus="{ item }">
+        <span>{{ Number(item.total_bonus).toLocaleString('en-us') }}</span>
+      </template>
+      <template #minus="{ item }">
+        <span>{{ Number(item.minus).toLocaleString('en-us') }}</span>
+      </template>
+
+      <template #input_date="{ item }">
+        <div>{{ formatDate(item.input_date) }}</div>
+      </template>
+      <template #created_at="{ item }">
+        <div style="white-space: nowrap">{{ formatDateTime(item.created_at) }}</div>
+      </template>
+
+      <template #actions="{ item }">
+        <div class="action-btn-container">
+          <button @click="handleEdit(item)">Edit</button>
+          <button @click="handleDelete(item)">Delete</button>
+        </div>
+      </template>
+
+      <!-- Expanded row -->
+      <template #expanded-row="{ item }">
+        <ul>
+          <li>{{ item.id }}</li>
+        </ul>
+      </template>
+    </BDatatable>
+  </div>
+</template>
+
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import SmDatatable from './components/SmDatatable.vue'
+import { computed, onMounted, ref } from 'vue'
+import BDatatable from './components/BDatatable.vue'
 import type {
   TableHeader,
   TableResult,
-  SmTableSort,
-  SmTablePerPage,
-  SmTableTextFilter,
-  SmTableNumberFilter,
-  SmTableListFilter,
+  BTableSort,
+  BTablePerPage,
+  BTableTextFilter,
+  BTableNumberFilter,
+  BTableListFilter,
   Theme,
 } from './types'
 
 interface Inventory {
   id: number
-  type: number
   name: string
-  prefix: string
 }
 
 interface Supplier {
   id: number
   name: string
-  code: string
-  type: number
-  phone: string | null
+  code?: string
+  type?: number
+  phone?: string | null
 }
 
-const invList = ref<Inventory[]>([
-  { id: 1, type: 1, name: 'Main Branch', prefix: 'MB' },
-  { id: 2, type: 1, name: 'Branch 2', prefix: 'B2' },
-  { id: 3, type: 1, name: 'Branch 3', prefix: 'B3B' },
+const branchList = ref([
+  {
+    id: 1,
+    name: 'Main',
+    prefix: 'M',
+    color: null,
+    created_at: '2025-01-11T02:09:55.877045+03:00',
+  },
 ])
-const suppliersList = ref<Supplier[]>([
-  { id: 1, name: 'Bazar', code: 'S1', type: 0, phone: '0' },
-  { id: 2, name: 'Supplier 2', code: 'S2', type: 0, phone: '1' },
-  { id: 3, name: 'market', code: 'S3', type: 0, phone: '098789' },
-  { id: 4, name: 'saman ali', code: 'S4', type: 0, phone: '099' },
-  { id: 5, name: 'xalid', code: 'S5', type: 0, phone: '089756' },
-  { id: 6, name: 'Azad Company', code: 'S6', type: 0, phone: null },
-  { id: 7, name: 'hasan baqi', code: 'S7', type: 0, phone: '00' },
-  { id: 8, name: 'Kak ahmad', code: 'S8', type: 0, phone: '2636273737' },
-  { id: 9, name: 'دابینکەری یەکەم', code: 'S9', type: 0, phone: null },
-  { id: 10, name: 'ئەحمەد عەلی', code: 'S10', type: 0, phone: null },
-  { id: 11, name: 'کاروان کەریم', code: 'S11', type: 0, phone: null },
-  { id: 12, name: 'کۆمپانیای شازاد', code: 'S12', type: 0, phone: null },
-  { id: 13, name: 'كاروان کەریم', code: 'S13', type: 0, phone: null },
-  { id: 14, name: 'Grespania', code: 'S14', type: 0, phone: null },
-  { id: 15, name: 'Supplier A', code: 'S15', type: 0, phone: null },
-  { id: 16, name: 'Net Gate', code: 'S16', type: 0, phone: null },
-  { id: 17, name: 'هەوراز', code: 'S17', type: 1, phone: null },
-  { id: 18, name: 'narcihealth company', code: 'S18', type: 0, phone: null },
-  { id: 19, name: 'LG', code: 'S19', type: 0, phone: null },
-  { id: 20, name: 'HP', code: 'S20', type: 0, phone: '00000' },
-  { id: 21, name: 'stationary', code: 'S21', type: 0, phone: '987654' },
-  { id: 22, name: 'amc hospital', code: 'S22', type: 2, phone: null },
-  { id: 23, name: 'par hospital', code: 'S23', type: 2, phone: null },
-  { id: 24, name: 'supplier 2', code: 'S24', type: 0, phone: '00000' },
-  { id: 25, name: 'goran net', code: 'S25', type: 2, phone: '00' },
-  { id: 26, name: 'کارتی مۆبایل', code: 'S26', type: 2, phone: null },
-  { id: 27, name: 'Acer', code: 'S27', type: 0, phone: null },
-  { id: 28, name: 'peshangay mateen', code: 'S28', type: 0, phone: null },
-  { id: 29, name: 'yarnda', code: 'S29', type: 0, phone: null },
-  { id: 30, name: 'slemani', code: 'S30', type: 0, phone: '994684684946894' },
-  { id: 31, name: 'kak omer', code: 'S31', type: 0, phone: null },
-  { id: 32, name: 'ahmad', code: 'S32', type: 0, phone: null },
+const invList = ref<Inventory[]>([
+  { id: 1, name: 'Main Inventory' },
+  { id: 2, name: 'Second Inventory' },
+  { id: 3, name: 'Maxzany mandwby 1' },
+  { id: 4, name: 'مەخزەنی سیداد' },
+  { id: 5, name: 'MAXZANI said' },
+  { id: 6, name: 'maxzani omer' },
+  { id: 7, name: 'مەخزەنی رابەر' },
+  { id: 8, name: 'jamal1' },
+  { id: 9, name: 'sidad1' },
+  { id: 10, name: 'saed1' },
+  { id: 11, name: 'abdulrahman1' },
+  { id: 12, name: 'rebin1' },
+  { id: 13, name: 'mustafa' },
+  { id: 14, name: 'ali1' },
+])
+const cashDebitList = ref([
+  { title: 'Cash', value: true },
+  { title: 'Debit', value: false },
+])
+const customerList = ref<Supplier[]>([
+  { id: 1, name: 'General', phone: null },
+  { id: 76, name: 'مارکیت مستەفا 3', phone: '0750' },
+  { id: 75, name: 'مارکیت مستەفا 2', phone: '0750' },
+  { id: 74, name: 'مارکیت مستەفا 1', phone: '0750' },
+  { id: 73, name: 'مارکیت علی 12', phone: '0750' },
+  { id: 72, name: 'مارکیت احمد 12', phone: '07504' },
+  { id: 71, name: 'مارکیت محمد 12', phone: '07504' },
+  { id: 70, name: 'مارکیت علی 1111', phone: '0750' },
+  { id: 69, name: 'مارکیت محمد 1111', phone: '0750' },
+  { id: 68, name: 'مارکیت احمد 1111', phone: '0750' },
+  { id: 67, name: 'مارکیت علی 111', phone: '0750' },
+  { id: 66, name: 'مارکیت احمد 111', phone: '00750' },
+  { id: 65, name: 'مارکیت محمد 111', phone: '0750' },
+  { id: 64, name: 'مارکیت علی 11', phone: '0750' },
+  { id: 63, name: 'مارکیت محمد 11', phone: '0750' },
+  { id: 62, name: 'مارکیت احمد 11', phone: '0751' },
+  { id: 61, name: 'مارکیت علی 1', phone: '750' },
+  { id: 60, name: 'مارکیت احمد 1', phone: '0750' },
+  { id: 59, name: 'مارکیت محمد 1', phone: '0750' },
+  { id: 53, name: 'مارکیت علی 2', phone: '0750' },
+  { id: 52, name: 'مارکیت ناوزاد', phone: '0750' },
+  { id: 51, name: 'مرکیت محمد', phone: '0750' },
+  { id: 50, name: 'مارکیت خۆشناو', phone: '0750' },
+  { id: 49, name: 'مارکیت تیم مارت', phone: '07500' },
+  { id: 48, name: 'مارکیت ئادەم', phone: '09877' },
+  { id: 47, name: 'مارکیت هیوا', phone: '9898698' },
+  { id: 46, name: 'test3', phone: null },
+  { id: 45, name: 'test2', phone: null },
+  { id: 44, name: 'test1', phone: null },
+  { id: 43, name: 'تیمارتی نازناز', phone: '4444' },
+  { id: 42, name: 'مارکیت مستەفا', phone: '0750' },
+  { id: 41, name: 'مارکیت سعید', phone: '0750' },
+  { id: 40, name: 'مارکیت علی', phone: '0750' },
+  { id: 39, name: 'مارکیت جەمال', phone: '0750' },
+  { id: 38, name: 'مارکیت سیداد', phone: '0750' },
+  { id: 37, name: 'مارکیت احمد', phone: '0750' },
+  { id: 29, name: 'مارکێتی هەوار', phone: null },
+  { id: 28, name: 'markety shaxy', phone: null },
+  { id: 27, name: 'markety dldar', phone: null },
+  { id: 23, name: 'محمد 1', phone: '' },
+  { id: 22, name: 'رێکار صاڵح', phone: '١٢٣٤٥٦٧' },
+  { id: 21, name: 'محمد', phone: null },
+  { id: 19, name: 'رێکار', phone: '132' },
+  { id: 17, name: 'کاک هیوا ساڵح', phone: '02121231' },
+  { id: 15, name: 'کۆمپانیای رابەر', phone: '07707423031' },
+  { id: 12, name: 'rabar', phone: '07707423031' },
+  { id: 9, name: 'Meri', phone: null },
+  { id: 8, name: 'Miss Rock', phone: null },
+  { id: 7, name: 'lana', phone: null },
+  { id: 6, name: 'mohammad', phone: null },
+  { id: 5, name: 'kawan lavender', phone: '07704364422' },
 ])
 
 const headers = ref<TableHeader[]>([
-  { title: '#', key: 'counter_column', sortable: false, column: 'counter_column' },
+  { title: 'ID', key: 'id', column: 'id', sortable: true, filterType: 'id', headerProps: { style: 'width: 55px' } },
+  {
+    title: 'Branch',
+    key: 'branch.name',
+    column: 'branch',
+    sortable: true,
+    filterType: 'list',
+    list: branchList.value,
+  },
   {
     title: 'Inventory',
-    key: 'inventory',
+    key: 'inventory.name',
+    column: 'inventory',
     sortable: true,
-    column: 'inventory_id',
     filterType: 'list',
     list: invList.value,
   },
   {
-    title: 'Supplier',
-    key: 'supplier',
+    title: 'Customer',
+    key: 'partner.name',
+    column: 'partner',
     sortable: true,
-    column: 'supplier_id',
     filterType: 'list',
-    list: suppliersList.value,
+    list: customerList.value,
+  },
+  { title: 'Invoice No.', key: 'invoice_no', column: 'invoice_no', sortable: true, filterType: 'text' },
+  {
+    title: 'Cash/Debit',
+    key: 'is_cash',
+    column: 'is_cash',
+    sortable: true,
+    filterType: 'list',
+    list: cashDebitList.value,
+    itemTitle: 'title',
+    itemValue: 'value',
   },
   {
-    title: 'Name',
-    key: 'item_name',
+    title: 'Currency',
+    key: 'currency.code',
+    column: 'currency',
     sortable: true,
-    column: 'items.name',
-    filterType: 'text',
-    // headerProps: { style: 'background-color: tomato;' },
-    // cellProps: { style: 'background-color: skyblue;' },
+    filterType: 'list',
+    list: [
+      { id: 1, code: 'IQD', name: 'IQD' },
+      { id: 2, code: 'USD', name: 'USD' },
+    ],
   },
-  { title: 'Barcode', key: 'barcode', sortable: true, column: 'items.barcode', filterType: 'text' },
-  { title: 'Quantity', key: 'quantity', sortable: true, column: 'products.quantity', filterType: 'number' },
+  { title: 'Total Price', key: 'total_price', sortable: true, column: 'total_price', filterType: 'number' },
+  { title: 'Discount', key: 'discount', sortable: true, column: 'discount', filterType: 'number' },
+  { title: 'Minus', key: 'minus', sortable: true, column: 'minus', filterType: 'number' },
+  { title: 'Net Price', key: 'net_price', sortable: true, column: 'net_price', filterType: 'number' },
+  { title: 'Net Price (FC)', key: 'net_price_fc', sortable: true, column: 'net_price_fc', filterType: 'number' },
+  { title: 'Total Quantity', key: 'total_quantity', sortable: true, column: 'total_quantity', filterType: 'number' },
+  { title: 'Total Bonus', key: 'total_bonus', sortable: true, column: 'total_bonus', filterType: 'number' },
   {
-    title: 'Purchase Price',
-    key: 'purchase_price',
-    sortable: true,
-    column: 'products.purchase_price',
-    filterType: 'number',
+    title: 'Status',
+    key: 'invoice_status',
+    column: 'invoice_status',
+    filterType: 'list',
+    list: [
+      { title: 'Unpaid', value: 'Unpaid', color: 'error' },
+      { title: 'Paid', value: 'Paid', color: 'success' },
+      { title: 'Partial Paid', value: 'Partial Paid', color: 'warning' },
+    ],
+    itemTitle: 'title',
+    itemValue: 'value',
+    sortable: false,
   },
   {
-    title: 'Total Purchase Price',
-    key: 'total_purchase_price',
-    sortable: true,
-    complex: true,
-    column: 'products.total_purchase_price',
-    columns: ['products.quantity', 'products.purchase_price'],
-    filterType: 'number',
+    title: 'Sale Status',
+    key: 'status',
+    column: 'status',
+    filterType: 'list',
+    list: [
+      { title: 'Draft', value: 'draft' },
+      { title: 'Pending', value: 'pending' },
+      { title: 'Completed', value: 'completed' },
+    ],
+    itemTitle: 'title',
+    itemValue: 'value',
+    sortable: false,
   },
-  { title: 'Cost', key: 'cost', sortable: true, column: 'products.cost', filterType: 'number' },
   {
-    title: 'Total Cost',
-    key: 'total_cost',
-    sortable: true,
-    column: 'products.total_cost',
-    complex: true,
-    columns: ['products.quantity', 'products.cost'],
-    filterType: 'number',
+    title: 'User',
+    key: 'user.username',
+    sortable: false,
+    column: 'user',
+    filterType: 'list',
+    list: [
+      { id: 16, username: 'mustafa1' },
+      { id: 6, username: 'ali ' },
+      { id: 7, username: 'mustafa' },
+      { id: 14, username: 'abdulrahman1' },
+      { id: 2, username: 'cashier1' },
+      { id: 3, username: 'cashier2' },
+      { id: 1, username: 'superadmin' },
+      { id: 5, username: 'sidad' },
+      { id: 10, username: 'rabar1' },
+      { id: 8, username: 'SAID' },
+      { id: 9, username: 'omer' },
+      { id: 15, username: 'rebin1' },
+      { id: 17, username: 'ali1' },
+      { id: 13, username: 'saed1' },
+      { id: 12, username: 'sidad1' },
+      { id: 4, username: 'mandwb1' },
+      { id: 11, username: 'jamal1' },
+    ],
+    itemTitle: 'username',
   },
+  { title: 'Date', key: 'input_date', sortable: true, column: 'input_date' },
   { title: 'Created At', key: 'created_at', sortable: true, column: 'created_at' },
-  { title: 'Actions', key: 'actions', sortable: false, column: 'actions', align: 'center' },
+  {
+    title: '',
+    key: 'actions',
+    sortable: false,
+    align: 'center',
+    cellProps: { class: 'table-action-column border-s-sm' },
+    // headerProps: { class: 'table-action-column border-s-sm' },
+  },
 ])
 const bodySlots: Array<string> = [
-  'counter_column',
-  'item_name',
-  'purchase_price',
-  'total_purchase_price',
-  'cost',
-  'total_cost',
+  'invoice_no',
+  'is_cash',
+  'total_price',
+  'net_price',
+  'net_price_fc',
+  'total_quantity',
+  'total_bonus',
+  'invoice_status',
+  'status',
+  'minus',
+  'input_date',
   'created_at',
   'actions',
 ]
 
-const tableRef = ref<InstanceType<typeof SmDatatable>>()
-const baseUrl = ref<string>('https://demo.smapplication.com')
+const tableRef = ref<InstanceType<typeof BDatatable>>()
+const baseUrl = ref<string>('https://demo.merycompany.com')
 
 onMounted(() => {
   getData()
 })
 
 const loading = ref(false)
-const results = ref<TableResult>({ data: [], total: 0, footer: {} })
+const apiData = ref<TableResult>({ results: [], count: 0, footer: {}, next: null, previous: null })
 
 interface QueryParams {
-  sortBy: string
-  sortDir: string
+  sortBy?: string
+  sortDir?: string
   search: string | null
+  ordering?: string
   page: number
-  perPage: number
-  text: Array<SmTableTextFilter>
-  number: Array<SmTableNumberFilter>
+  perPage?: number
+  page_size?: number
+  text?: Array<BTableTextFilter>
+  number?: Array<BTableNumberFilter>
   /**
    * [key: string]: unknown is an index signature
    * it tells TypeScript "this object may also have any additional string keys with unknown values".
@@ -164,31 +387,47 @@ interface QueryParams {
   [key: string]: unknown
 }
 const queryParams = ref<QueryParams>({
-  sortBy: 'id',
-  sortDir: 'desc',
+  ordering: '-id',
   search: '',
   page: 1,
-  perPage: 50,
-  text: [],
-  number: [],
+  page_size: 25,
+  input_date_after: '2025-06-01',
+  input_date_before: '2026-06-01',
 })
+
+const pageCount = computed(() => {
+  return Math.ceil(apiData.value.count / (queryParams.value.page_size ?? 25))
+})
+
+function buildSearchParams(params: QueryParams) {
+  const searchParams = new URLSearchParams()
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null) return
+    if (Array.isArray(value)) {
+      value.forEach((item) => searchParams.append(key, String(item)))
+    } else {
+      searchParams.append(key, String(value))
+    }
+  })
+  return searchParams
+}
 
 async function getData() {
   loading.value = true
   const token = import.meta.env.VITE_BEARER_TOKEN
   try {
-    const response = await fetch(`${baseUrl.value}/api/product/index`, {
-      method: 'POST',
+    const params = buildSearchParams(queryParams.value)
+    const response = await fetch(`${baseUrl.value}/api/sale/?${params}`, {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(queryParams.value),
     })
     const data = await response.json()
-    results.value = data
-    // results.value.data = results.value.data.map((el) => {
+    apiData.value = data
+    // apiData.value.data = apiData.value.data.map((el) => {
     //   return {
     //     ...el,
     //     is_checked: true,
@@ -223,67 +462,108 @@ function handlePrint() {
   console.log('handlePrint')
 }
 
-function handleUpdateTextFilter(obj: SmTableTextFilter) {
-  /**
-   * check if incoming object exist in queryParams
-   * if incoming object has value append it to queryParams, if not remove ir from queryParams
-   */
-  const foundIndex = queryParams.value.text.findIndex((item) => item.column === obj.column)
-  if (foundIndex > -1) {
-    if (obj?.value?.length) {
-      queryParams.value.text[foundIndex] = { ...obj, complex: false }
-    } else {
-      queryParams.value.text.splice(foundIndex, 1)
+function formatDateTime(dateTimeString: string) {
+  const date = new Date(dateTimeString)
+
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = date.getFullYear()
+
+  let hours = date.getHours()
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+
+  const ampm = hours >= 12 ? 'pm' : 'am'
+  hours = hours % 12 || 12
+
+  return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`
+}
+
+function formatDate(dateString: string) {
+  const [year, month, day] = dateString.split('-')
+  return `${day}/${month}/${year}`
+}
+
+function handleUpdateTextFilter(obj: BTableTextFilter) {
+  // check if incoming object exist
+  for (let param in queryParams.value) {
+    const lastIndex = param.lastIndexOf('__')
+
+    if (lastIndex > -1) {
+      param = param.substring(0, lastIndex)
     }
-  } else if (obj?.value?.length) {
-    queryParams.value.text.push({ ...obj, complex: false })
+
+    if (obj.columnQuery.includes(param)) {
+      delete queryParams.value[param]
+      delete queryParams.value[param + '__istartswith']
+      delete queryParams.value[param + '__iendswith']
+      delete queryParams.value[param + '__icontains']
+      delete queryParams.value[param + '__iexact']
+      delete queryParams.value[param + '__not']
+      delete queryParams.value[param + '__not__icontains']
+    }
+  }
+
+  if (obj.value !== null) {
+    queryParams.value[obj.columnQuery] = obj.value
   }
 
   queryParams.value.page = 1
   getData()
 }
 
-function handleUpdateNumberFilter(obj: SmTableNumberFilter) {
-  /**
-   * check if incoming object exist in queryParams
-   * if incoming object has value append it to queryParams, if not remove ir from queryParams
-   */
-  const foundIndex = queryParams.value.number.findIndex((item) => item.column === obj.column)
-  if (foundIndex > -1) {
-    if (obj?.value?.length) {
-      queryParams.value.number[foundIndex] = { ...obj, complex: false }
-    } else {
-      queryParams.value.number.splice(foundIndex, 1)
+function handleUpdateNumberFilter(obj: BTableNumberFilter) {
+  // check if incoming object exist
+  for (let param in queryParams.value) {
+    const lastIndex = param.lastIndexOf('__')
+
+    if (lastIndex > -1) {
+      param = param.substring(0, lastIndex)
     }
-  } else if (obj?.value?.length) {
-    queryParams.value.number.push({ ...obj, complex: false })
+
+    if (obj.columnQuery.includes(param)) {
+      delete queryParams.value[param]
+      delete queryParams.value[param + '__lt']
+      delete queryParams.value[param + '__lte']
+      delete queryParams.value[param + '__gt']
+      delete queryParams.value[param + '__gte']
+      delete queryParams.value[param + '__not']
+    }
+  }
+
+  if (obj.value !== null) {
+    queryParams.value[obj.columnQuery] = obj.value
   }
 
   queryParams.value.page = 1
   getData()
 }
 
-function handleUpdateListFilter(obj: SmTableListFilter) {
-  const splitted = obj.column.split('__')
-  const headerKey = splitted[0]
-  const lookup = splitted[1]
-  const lookupKey = `${headerKey}_lookup`
+function handleUpdateListFilter(obj: BTableListFilter) {
+  // remove existing filter on incoming column
+  for (const param in queryParams.value) {
+    if (obj.column.includes(param)) {
+      delete queryParams.value[param]
+    }
+  }
 
-  if (obj.values.length === 0) {
-    delete queryParams.value[headerKey]
-    delete queryParams.value[lookupKey]
+  if (obj.values.length) {
+    queryParams.value[obj.column] = obj.values.join(',')
+  }
+
+  queryParams.value.page = 1
+  getData()
+}
+
+function handleUpdateSort(obj: BTableSort) {
+  if (obj?.column && obj?.direction) {
+    if (obj.direction === 'asc') {
+      queryParams.value.ordering = obj.column
+    } else {
+      queryParams.value.ordering = `-${obj.column}`
+    }
   } else {
-    queryParams.value[headerKey] = obj.values
-    queryParams.value[lookupKey] = lookup
+    queryParams.value.ordering = '-id'
   }
-
-  queryParams.value.page = 1
-  getData()
-}
-
-function handleUpdateSort(obj: SmTableSort) {
-  queryParams.value.sortBy = obj?.column ?? 'id'
-  queryParams.value.sortDir = obj?.direction ?? 'asc'
   getData()
 }
 
@@ -297,8 +577,8 @@ function handleUpdateNextPage(page: number) {
   getData()
 }
 
-function handleUpdatePerPage(obj: SmTablePerPage) {
-  queryParams.value.perPage = obj.perPage
+function handleUpdatePerPage(obj: BTablePerPage) {
+  queryParams.value.page_size = obj.perPage
   queryParams.value.page = obj.page
   getData()
 }
@@ -315,93 +595,6 @@ function handleUpdateChecked(checkedItems: Array<object>) {
   console.log(checkedItems)
 }
 </script>
-
-<template>
-  <div class="sm--main-container">
-    <div style="margin-bottom: 0rem; display: flex; align-items: center; gap: 12px">
-      <div style="font-size: 28px">Stock</div>
-      <button
-        type="button"
-        class="theme-btn"
-        @click="changeTheme()"
-      >
-        Dark/Light
-      </button>
-    </div>
-
-    <SmDatatable
-      ref="tableRef"
-      :loading="loading"
-      :page="queryParams.page"
-      :perPage="queryParams.perPage"
-      :results="results"
-      :headers="headers"
-      :body-slots="bodySlots"
-      fixed-header
-      :border="{
-        table: true,
-        tableBorderRadius: '0.5rem',
-      }"
-      height="600px"
-      hover
-      show-totals
-      show-expand
-      :theme="theme"
-      density="compact"
-      :use-virtual-scroll="true"
-      store-table-header-in-local-storage
-      table-header-local-storage-name="my-stock-header"
-      show-select
-      @click:export-to-excel="handleExportToExcel()"
-      @click:reset="handleReset()"
-      @click:search="handleSearch()"
-      @click:print="handlePrint()"
-      @update:text-filter="handleUpdateTextFilter"
-      @update:number-filter="handleUpdateNumberFilter"
-      @update:list-filter="handleUpdateListFilter"
-      @update:sort="handleUpdateSort"
-      @update:prev-page="handleUpdatePrevPage"
-      @update:next-page="handleUpdateNextPage"
-      @update:per-page="handleUpdatePerPage"
-      @update:checked="handleUpdateChecked"
-    >
-      <template #item_name="{ item }">
-        <span style="color: #2196f3">{{ item.item_name }}</span>
-      </template>
-
-      <template #purchase_price="{ item }">
-        <span>{{ Number(item.purchase_price).toLocaleString('en-us') }}</span>
-      </template>
-      <template #total_purchase_price="{ item }">
-        <span>{{ Number(item.total_purchase_price).toLocaleString('en-us') }}</span>
-      </template>
-      <template #cost="{ item }">
-        <span>{{ Number(item.cost).toLocaleString('en-us') }}</span>
-      </template>
-      <template #total_cost="{ item }">
-        <span>{{ Number(item.total_cost).toLocaleString('en-us') }}</span>
-      </template>
-
-      <template #created_at="{ item }">
-        <div style="white-space: nowrap">{{ item.created_at }}</div>
-      </template>
-
-      <template #actions="{ item }">
-        <div class="action-btn-container">
-          <button @click="handleEdit(item)">Edit</button>
-          <button @click="handleDelete(item)">Delete</button>
-        </div>
-      </template>
-
-      <!-- Expanded row -->
-      <template #expanded-row="{ item }">
-        <ul>
-          <li>{{ item.id }}</li>
-        </ul>
-      </template>
-    </SmDatatable>
-  </div>
-</template>
 
 <style lang="scss">
 @use './assets/style.scss';
@@ -437,7 +630,7 @@ function handleUpdateChecked(checkedItems: Array<object>) {
   }
 }
 
-.sm--main-container {
+.b--main-container {
   padding: 16px 16px;
   font-family: sans-serif, monospace;
 }

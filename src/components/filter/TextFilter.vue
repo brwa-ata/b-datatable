@@ -223,11 +223,12 @@ function applyFilter() {
     z-index: 1000;
     min-width: 130px;
     margin: 0;
-    padding: 4px 0;
+    padding: 4px 6px;
     list-style: none;
-    background-color: var(--sm-dropdown-bg, #fff);
-    border: 1px solid var(--sm-dropdown-border, rgba(0, 0, 0, 0.12));
-    border-radius: 6px;
+    background-color: transparent;
+    backdrop-filter: blur(25px);
+    border: 1px solid var(--b-dropdown-border);
+    border-radius: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
@@ -235,20 +236,21 @@ function applyFilter() {
     display: block;
     width: 100%;
     padding: 6px 14px;
+    border-radius: 8px;
     background: transparent;
     border: none;
     text-align: left;
-    font-size: 0.875rem;
+    font-size: 0.775rem;
     cursor: pointer;
-    color: var(--sm-dropdown-text, inherit);
+    color: var(--b-dropdown-text, inherit);
     white-space: nowrap;
 
     &:hover {
-      background-color: var(--sm-dropdown-hover, rgba(0, 0, 0, 0.05));
+      background-color: var(--b-dropdown-hover, rgba(0, 0, 0, 0.05));
     }
 
     &--active {
-      color: var(--sm-color-blue);
+      color: var(--b-color-blue);
     }
   }
 
@@ -258,10 +260,10 @@ function applyFilter() {
     outline: none;
     border: none;
     background: transparent;
-    color: var(--sm-input-color, inherit);
+    color: var(--b-input-color, inherit);
 
     &::placeholder {
-      color: var(--sm-input-placeholder);
+      color: var(--b-input-placeholder);
     }
   }
 

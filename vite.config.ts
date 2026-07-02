@@ -21,9 +21,9 @@ export default defineConfig(({ mode }) => {
       ? {
           lib: {
             entry: resolve(fileURLToPath(new URL('.', import.meta.url)), 'src/index.js'),
-            name: 'SmDatatable',
-            fileName: 'sm-datatable',
-            cssFileName: 'sm-datatable',
+            name: 'BDatatable',
+            fileName: 'b-datatable',
+            cssFileName: 'b-datatable',
           },
           cssCodeSplit: false,
           rollupOptions: {
@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => {
               globals: {
                 vue: 'Vue',
               },
-              assetFileNames: 'sm-datatable.[ext]',
+              assetFileNames: 'b-datatable.[ext]',
             },
           },
         }
