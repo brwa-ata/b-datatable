@@ -1,4 +1,10 @@
-* {
+// Scoped to the component roots so this reset never leaks into a host app that
+// imports the library. `.b-dt` is BDatatable's root; `.b__table-wrapper` covers
+// BTable used standalone.
+.b-dt,
+.b-dt *,
+.b__table-wrapper,
+.b__table-wrapper * {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
