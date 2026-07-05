@@ -1,14 +1,15 @@
 // Reset scoped to the component's own subtree so it never leaks into a host app.
 // `.b-dt` is BDatatable's root; `.b__table-wrapper` covers BTable used alone.
 //
-// `:not([class*='v-'])` excludes host UI slotted into the table (toolbar fields,
-// cell chips/buttons, etc.) — Vuetify elements all carry `v-*` classes, and
-// zeroing their margin/padding would break their design. The library's own
-// elements use `b-dt`/`b__` prefixes, so they're still fully reset.
+// `:where(:not([class*='v-']))` excludes host UI slotted into the table (toolbar
+// fields, cell chips/buttons, …) — Vuetify elements all carry `v-*` classes, and
+// zeroing their margin/padding would break their design. `:where()` adds ZERO
+// specificity, so this stays at (0,1,0) — the same as a plain `.b-dt *` — and the
+// library's own scoped component styles (0,2,0) still win over it as intended.
 .b-dt,
 .b__table-wrapper,
-.b-dt *:not([class*='v-']),
-.b__table-wrapper *:not([class*='v-']) {
+.b-dt *:where(:not([class*='v-'])),
+.b__table-wrapper *:where(:not([class*='v-'])) {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
