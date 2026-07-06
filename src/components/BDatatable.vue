@@ -371,6 +371,8 @@
             </button>
           </div>
         </template>
+
+        <slot name="append-table-toolbar" />
       </div>
     </div>
 
