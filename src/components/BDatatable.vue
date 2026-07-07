@@ -14,6 +14,7 @@
       <div
         v-if="hasLeftActions"
         class="b-dt__toolbar-left"
+        :style="toolbarBgStyle"
       >
         <button
           v-if="props.showResetBtn"
@@ -279,6 +280,7 @@
             type="button"
             :disabled="props.loading"
             :class="{ 'b-dt__btn-disabled': props.loading }"
+            :style="toolbarBgStyle"
             @click="showPerPageDropdown = !showPerPageDropdown"
           >
             {{ props.perPage }}
@@ -317,13 +319,17 @@
           <!-- total count badge -->
           <span
             class="b-dt__count-badge"
+            :style="toolbarBgStyle"
             :title="`${(props.apiData.count || 0).toLocaleString()} records`"
           >
             {{ (props.apiData.count || 0).toLocaleString() }}
           </span>
 
           <!-- prev / page / next (unified segmented pill) -->
-          <div class="b-dt__pager">
+          <div
+            class="b-dt__pager"
+            :style="toolbarBgStyle"
+          >
             <button
               class="b-dt__pager-btn"
               type="button"
@@ -634,6 +640,7 @@ const props = withDefaults(defineProps<BDatatableProps>(), {
   theme: 'light',
   itemKey: 'id',
   copyOnCellClick: false,
+  tableToolbarBgColor: '',
 })
 
 const emit = defineEmits<{
@@ -665,6 +672,10 @@ const hasLeftActions = computed(
     props.showExportToExcelBtn ||
     props.showToggleHeaderBtn,
 )
+
+// When `tableToolbarBgColor` is provided, override the toolbar action backgrounds;
+// otherwise fall back to the theme-driven color defined in CSS.
+const toolbarBgStyle = computed(() => (props.tableToolbarBgColor ? { backgroundColor: props.tableToolbarBgColor } : {}))
 
 const perPageList = computed(() => props.perPageOptions)
 const perPageWrapper = ref<HTMLElement | null>(null)
