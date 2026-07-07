@@ -550,11 +550,18 @@
         #footer
       >
         <tr class="b__sticky-table-footer">
-          <td v-if="props.showSelect" />
-          <td v-if="props.showExpand" />
+          <td
+            :style="`background-color: ${props.headerRowBgColor}`"
+            v-if="props.showSelect"
+          />
+          <td
+            :style="`background-color: ${props.headerRowBgColor}`"
+            v-if="props.showExpand"
+          />
           <td
             v-for="(footer, footerIndex) in visibleHeaders"
             :key="footerIndex"
+            :style="`background-color: ${props.headerRowBgColor}`"
           >
             <div v-if="footer.key === 'counter_column'" />
             <div v-else>{{ formatNumber(props.apiData.footer[footer.key]) }}</div>
