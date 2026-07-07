@@ -409,10 +409,12 @@
           <th
             v-if="props.showExpand"
             class="b__expand-th"
+            :style="`background-color: ${props.headerRowBgColor}`"
           ></th>
           <th
             v-if="props.showSelect"
             class="b__select-th"
+            :style="`background-color: ${props.headerRowBgColor}`"
           >
             <input
               type="checkbox"
@@ -427,6 +429,7 @@
             :key="column.key"
             v-bind="column.headerProps"
             :class="{ b__sortable: column.sortable }"
+            :style="`background-color: ${props.headerRowBgColor}`"
             @click="column.sortable ? toggleSort(column.key) : null"
           >
             <div

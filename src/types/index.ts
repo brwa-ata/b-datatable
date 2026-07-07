@@ -97,6 +97,7 @@ export default interface BDatatableProps {
   tableHeaderLocalStorageName?: string | null
   theme?: Theme
   itemKey?: string
+  headerRowBgColor?: string
   filterHeaderRowBgColor?: string
   copyOnCellClick?: boolean
 }
