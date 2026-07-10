@@ -352,7 +352,7 @@ function onlyNumber(val: string | number | null): number | string | null {
     background: transparent;
     border: none;
     text-align: left;
-    font-size: 0.775rem;
+    font-size: 0.875rem;
     cursor: pointer;
     color: var(--b-dropdown-text, inherit);
     white-space: nowrap;
