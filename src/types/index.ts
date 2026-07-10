@@ -101,4 +101,5 @@ export default interface BDatatableProps {
   filterHeaderRowBgColor?: string
   tableToolbarBgColor?: string
   copyOnCellClick?: boolean
+  footerClass?: string
 }

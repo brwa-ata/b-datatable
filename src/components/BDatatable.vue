@@ -568,6 +568,7 @@
             v-for="(footer, footerIndex) in visibleHeaders"
             :key="footerIndex"
             :style="`background-color: ${props.headerRowBgColor}`"
+            :class="props.footerClass"
           >
             <div v-if="footer.key === 'counter_column'" />
             <div v-else>{{ formatNumber(props.apiData.footer[footer.key]) }}</div>
@@ -641,6 +642,7 @@ const props = withDefaults(defineProps<BDatatableProps>(), {
   itemKey: 'id',
   copyOnCellClick: false,
   tableToolbarBgColor: '',
+  footerClass: '',
 })
 
 const emit = defineEmits<{
