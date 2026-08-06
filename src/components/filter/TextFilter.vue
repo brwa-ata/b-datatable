@@ -125,10 +125,10 @@ const symbol = ref('__startswith')
 const searchValue = ref('')
 const filterApplied = ref(false)
 const textFilterOptions = [
-  { title: 'Start with', value: '__startswith' },
-  { title: 'End with', value: '__endswith' },
-  { title: 'Contains', value: '__contains' },
-  { title: 'Exact', value: '__exact' },
+  { title: 'Start with', value: '__istartswith' },
+  { title: 'End with', value: '__iendswith' },
+  { title: 'Contains', value: '__icontains' },
+  { title: 'Exact', value: '__iexact' },
   { title: 'Except', value: '__not' },
   { title: 'Comma separate', value: '__comma_separate' },
 ]
