@@ -101,57 +101,72 @@
           type="search"
           class="lf__search-input"
           placeholder="Search..."
+          autocomplete="off"
         />
       </div>
 
       <!-- list -->
-      <div class="lf__list">
+      <div
+        class="lf__list"
+        ref="containerRef"
+        @scroll.passive="onScroll"
+      >
         <div
-          v-for="(item, index) in filteredList"
-          :key="index"
-          class="lf__list-item"
-          :class="{ 'lf__list-item--checked': item.checked }"
-          @click="item.checked = !item.checked"
+          class="lf__list-sizer"
+          :style="{ height: `${totalHeight}px` }"
         >
-          <span class="lf__check-icon">
-            <svg
-              v-if="item.checked"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              width="16"
-              height="16"
-              color="currentColor"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.5"
+          <div
+            class="lf__list-window"
+            :style="{ transform: `translateY(${offsetY}px)` }"
+          >
+            <div
+              v-for="row in visibleItems"
+              :key="row.index"
+              class="lf__list-item"
+              :class="{ 'lf__list-item--checked': row.item.checked }"
+              @click="row.item.checked = !row.item.checked"
             >
-              <path
-                d="M2.5 12C2.5 7.52166 2.5 5.28249 3.89124 3.89124C5.28249 2.5 7.52166 2.5 12 2.5C16.4783 2.5 18.7175 2.5 20.1088 3.89124C21.5 5.28249 21.5 7.52166 21.5 12C21.5 16.4783 21.5 18.7175 20.1088 20.1088C18.7175 21.5 16.4783 21.5 12 21.5C7.52166 21.5 5.28249 21.5 3.89124 20.1088C2.5 18.7175 2.5 16.4783 2.5 12Z"
-              ></path>
-              <path
-                d="M8 12.5L10.5 15L16 9"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              ></path>
-            </svg>
+              <span class="lf__check-icon">
+                <svg
+                  v-if="row.item.checked"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  color="currentColor"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
+                  <path
+                    d="M2.5 12C2.5 7.52166 2.5 5.28249 3.89124 3.89124C5.28249 2.5 7.52166 2.5 12 2.5C16.4783 2.5 18.7175 2.5 20.1088 3.89124C21.5 5.28249 21.5 7.52166 21.5 12C21.5 16.4783 21.5 18.7175 20.1088 20.1088C18.7175 21.5 16.4783 21.5 12 21.5C7.52166 21.5 5.28249 21.5 3.89124 20.1088C2.5 18.7175 2.5 16.4783 2.5 12Z"
+                  ></path>
+                  <path
+                    d="M8 12.5L10.5 15L16 9"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  ></path>
+                </svg>
 
-            <svg
-              v-else
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              width="16"
-              height="16"
-              color="currentColor"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.5"
-            >
-              <path
-                d="M2.5 12C2.5 7.52166 2.5 5.28249 3.89124 3.89124C5.28249 2.5 7.52166 2.5 12 2.5C16.4783 2.5 18.7175 2.5 20.1088 3.89124C21.5 5.28249 21.5 7.52166 21.5 12C21.5 16.4783 21.5 18.7175 20.1088 20.1088C18.7175 21.5 16.4783 21.5 12 21.5C7.52166 21.5 5.28249 21.5 3.89124 20.1088C2.5 18.7175 2.5 16.4783 2.5 12Z"
-              ></path>
-            </svg>
-          </span>
-          {{ getItemTitle(item) }}
+                <svg
+                  v-else
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  color="currentColor"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
+                  <path
+                    d="M2.5 12C2.5 7.52166 2.5 5.28249 3.89124 3.89124C5.28249 2.5 7.52166 2.5 12 2.5C16.4783 2.5 18.7175 2.5 20.1088 3.89124C21.5 5.28249 21.5 7.52166 21.5 12C21.5 16.4783 21.5 18.7175 20.1088 20.1088C18.7175 21.5 16.4783 21.5 12 21.5C7.52166 21.5 5.28249 21.5 3.89124 20.1088C2.5 18.7175 2.5 16.4783 2.5 12Z"
+                  ></path>
+                </svg>
+              </span>
+              {{ getItemTitle(row.item) }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -160,6 +175,10 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { useVirtualList } from '../useVirtualList'
+
+// Keep in sync with the `.lf__list-item` height in the stylesheet below.
+const ITEM_HEIGHT = 32
 
 const prop = defineProps({
   list: { type: Array, required: true },
@@ -180,6 +199,10 @@ const filteredList = computed(() => {
   if (!searchText.value) return prop.list
   const search = searchText.value.toLowerCase()
   return prop.list.filter((item) => getItemTitle(item).toLowerCase().includes(search))
+})
+
+const { containerRef, onScroll, totalHeight, offsetY, visibleItems } = useVirtualList(filteredList, {
+  itemHeight: ITEM_HEIGHT,
 })
 
 function onClickOutside(e) {
@@ -214,6 +237,7 @@ function getItemTitle(item) {
 function clearFilter() {
   prop.list.forEach((item) => (item.checked = false))
   selectedItems.value = []
+  searchText.value = ''
   emit('value-changed', { column: `${prop.column}__${lookup.value}`, values: selectedItems.value })
   showDropdown.value = false
 }
@@ -411,10 +435,24 @@ function applyFilter() {
     padding: 4px 6px;
   }
 
+  // Virtual scroll: the sizer holds the full scroll height while only the
+  // rows inside the window are rendered.
+  &__list-sizer {
+    position: relative;
+  }
+
+  &__list-window {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    will-change: transform;
+  }
+
   &__list-item {
     display: flex;
     align-items: center;
-    min-height: 32px;
+    height: 32px; // fixed: the virtual scroller measures rows by this value
     padding: 0 4px;
     font-size: 13px;
     border-radius: 8px;

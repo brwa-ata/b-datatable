@@ -98,34 +98,49 @@
       </div>
 
       <!-- list -->
-      <div class="lfl__list">
+      <div
+        class="lfl__list"
+        ref="containerRef"
+        @scroll.passive="onScroll"
+      >
         <div
-          v-for="(value, index) in filteredList"
-          :key="index"
-          class="lfl__list-item"
-          @click="toggleValue(value)"
+          class="lfl__list-sizer"
+          :style="{ height: `${totalHeight}px` }"
         >
-          <span class="lfl__check-icon">
-            <svg
-              v-if="selected.has(value)"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              width="18"
-              height="18"
-              color="currentColor"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+          <div
+            class="lfl__list-window"
+            :style="{ transform: `translateY(${offsetY}px)` }"
+          >
+            <div
+              v-for="row in visibleItems"
+              :key="row.index"
+              class="lfl__list-item"
+              @click="toggleValue(row.item)"
             >
-              <path
-                d="M5 13.2592L7.58583 15.9568C8.2525 16.6523 8.58583 17.0001 9.00004 17.0001C9.41425 17.0001 9.74759 16.6523 10.4143 15.9568L19 7.00006"
-              ></path>
-            </svg>
-          </span>
-          {{ value }}
+              <span class="lfl__check-icon">
+                <svg
+                  v-if="selected.has(row.item)"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  color="currentColor"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M5 13.2592L7.58583 15.9568C8.2525 16.6523 8.58583 17.0001 9.00004 17.0001C9.41425 17.0001 9.74759 16.6523 10.4143 15.9568L19 7.00006"
+                  ></path>
+                </svg>
+              </span>
+              {{ row.item }}
+            </div>
+          </div>
         </div>
+
         <div
           v-if="!filteredList.length"
           class="lfl__empty"
@@ -140,6 +155,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { uniqueColumnValues, type LocalListLookup } from './localFilter'
+import { useVirtualList } from '../useVirtualList'
+
+// Keep in sync with the `.lfl__list-item` height in the stylesheet below.
+const ITEM_HEIGHT = 32
 
 const props = defineProps<{
   columnKey: string
@@ -164,6 +183,10 @@ const filteredList = computed(() => {
   if (!searchText.value) return options.value
   const query = searchText.value.toLowerCase()
   return options.value.filter((value) => String(value).toLowerCase().includes(query))
+})
+
+const { containerRef, onScroll, totalHeight, offsetY, visibleItems } = useVirtualList(filteredList, {
+  itemHeight: ITEM_HEIGHT,
 })
 
 function onClickOutside(e: MouseEvent) {
@@ -200,6 +223,7 @@ function emitChange() {
 
 function clearFilter() {
   selected.value = new Set()
+  searchText.value = ''
   emitChange()
   showDropdown.value = false
 }
@@ -400,10 +424,24 @@ function applyFilter() {
     padding: 4px 0;
   }
 
+  // Virtual scroll: the sizer holds the full scroll height while only the
+  // rows inside the window are rendered.
+  &__list-sizer {
+    position: relative;
+  }
+
+  &__list-window {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    will-change: transform;
+  }
+
   &__list-item {
     display: flex;
     align-items: center;
-    min-height: 32px;
+    height: 32px; // fixed: the virtual scroller measures rows by this value
     padding: 0 10px;
     font-size: 13px;
     cursor: pointer;

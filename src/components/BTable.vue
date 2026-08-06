@@ -1316,7 +1316,7 @@ $density-compact-height: 34px;
   --b-input-color: rgb(51, 51, 51);
   --b-input-placeholder: rgba(0, 0, 0, 0.35);
   --b-color-blue: rgb(0, 122, 255);
-  --b-active-filter-bg-color: rgba(251, 140, 0, 0.184);
+  --b-active-filter-bg-color: #ffd32b66;
   --b-table-header-bg: rgba(245, 245, 245, 1);
 }
 
@@ -1363,7 +1363,7 @@ $density-compact-height: 34px;
   --b-input-color: rgba(221, 221, 221, 1);
   --b-input-placeholder: rgba(255, 255, 255, 0.35);
   --b-color-blue: rgba(0, 122, 255);
-  --b-active-filter-bg-color: rgba(251, 140, 0, 0.184);
+  --b-active-filter-bg-color: #ffbe2e4f;
   --b-table-header-bg: rgba(45, 45, 45, 1);
 }
 

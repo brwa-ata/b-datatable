@@ -1219,9 +1219,9 @@ defineExpose({
     top: calc(100% + 4px);
     left: 0;
     z-index: 1000;
-    min-width: 80px;
+    min-width: 70px;
     margin: 0;
-    padding: 4px 0;
+    padding: 4px 4px;
     list-style: none;
     border: 1px solid;
     border-radius: 16px;
@@ -1230,10 +1230,12 @@ defineExpose({
   }
 
   &__perpage-option {
-    padding: 6px 16px;
+    padding: 6px 0px;
     font-size: 13px;
     cursor: pointer;
     transition: background-color 0.1s;
+    border-radius: 8px;
+    text-align: center;
 
     &--active {
       color: #2196f3;
