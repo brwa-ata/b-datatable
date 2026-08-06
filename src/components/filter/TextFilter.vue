@@ -121,7 +121,7 @@ const emit = defineEmits(['count-filter', 'value-changed'])
 
 const dropdownWrapper = ref<HTMLDivElement | null>(null)
 const showDropdown = ref(false)
-const symbol = ref('__startswith')
+const symbol = ref('__istartswith')
 const searchValue = ref('')
 const filterApplied = ref(false)
 const textFilterOptions = [
@@ -133,10 +133,10 @@ const textFilterOptions = [
   { title: 'Comma separate', value: '__comma_separate' },
 ]
 const symbols = ref([
-  { key: '__startswith', value: 'sw' },
-  { key: '__endswith', value: 'ew' },
-  { key: '__contains', value: 'co' },
-  { key: '__exact', value: 'ex' },
+  { key: '__istartswith', value: 'sw' },
+  { key: '__iendswith', value: 'ew' },
+  { key: '__icontains', value: 'co' },
+  { key: '__iexact', value: 'ex' },
   { key: '__not', value: 'exc' },
   { key: '__comma_separate', value: 'cs' },
 ])
@@ -161,7 +161,7 @@ function symbolChanged(val: string) {
 }
 
 function clearFilter() {
-  symbol.value = '__startswith'
+  symbol.value = '__istartswith'
   searchValue.value = ''
   filterApplied.value = false
   const columnQuery = props.column + symbol.value
