@@ -153,10 +153,11 @@
           <!-- Rendered rows (virtual or all) -->
           <template
             v-for="(item, index) in visibleItems"
-            :key="isVirtualScrollEnabled ? virtualScrollState.startIndex + index : index"
+            :key="getItemIndex(index)"
           >
             <tr
-              v-bind="props.rowProps"
+              v-bind="resolveRowProps(item, getItemIndex(index))"
+              :class="resolveRowClass(item, getItemIndex(index))"
               @click="onRowClick($event, item)"
               @dblclick="onRowDblClick($event, item)"
             >
@@ -205,7 +206,7 @@
                 <slot
                   :name="`item.${header.key}`"
                   :item="item"
-                  :index="isVirtualScrollEnabled ? virtualScrollState.startIndex + index : index"
+                  :index="getItemIndex(index)"
                   :value="getCellValue(item, header.key)"
                 >
                   {{ getCellValue(item, header.key) }}
@@ -223,7 +224,7 @@
                 <slot
                   name="b-expanded-row"
                   :item="item"
-                  :index="isVirtualScrollEnabled ? virtualScrollState.startIndex + index : index"
+                  :index="getItemIndex(index)"
                 />
               </td>
             </tr>
@@ -282,6 +283,9 @@ const props = defineProps({
   localSearch: { type: Boolean, default: false },
   useVirtualScroll: { type: Boolean, default: true },
   rowProps: { type: [Object, Function], default: () => {} },
+  // Class(es) applied to each body row. Accepts a string/array/object, or a
+  // function receiving the row data: (item, index) => string | string[] | object
+  rowClass: { type: [String, Array, Object, Function], default: '' },
   itemKey: { type: String, default: 'id' },
   loadingText: { type: String, default: 'Loading...' },
   theme: {
@@ -629,6 +633,22 @@ const processedItems = computed(() => {
 
 // Number of leading fixed columns (expand + select)
 const leadingColCount = computed(() => (props.showExpand ? 1 : 0) + (props.showSelect ? 1 : 0))
+
+// Index of a rendered row inside the full item list (offset when virtual scrolling)
+function getItemIndex(index) {
+  return isVirtualScrollEnabled.value ? virtualScrollState.value.startIndex + index : index
+}
+
+// Attributes bound on a body row, resolved per row when `rowProps` is a function
+function resolveRowProps(item, index) {
+  const rowProps = typeof props.rowProps === 'function' ? props.rowProps(item, index) : props.rowProps
+  return rowProps || {}
+}
+
+// Class(es) applied to a body row, resolved per row when `rowClass` is a function
+function resolveRowClass(item, index) {
+  return typeof props.rowClass === 'function' ? props.rowClass(item, index) : props.rowClass
+}
 
 // ============================================
 // Virtual scroll logic (must be after processedItems)

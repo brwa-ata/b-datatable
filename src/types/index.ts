@@ -31,6 +31,10 @@ export interface TableResult {
   footer?: Record<string, number | string>
 }
 
+export type RowClass = string | string[] | Record<string, boolean>
+
+export type RowClassResolver<T = object> = (item: T, index: number) => RowClass
+
 export interface BTableSort {
   column?: string
   direction?: 'asc' | 'desc'
@@ -102,4 +106,5 @@ export default interface BDatatableProps {
   tableToolbarBgColor?: string
   copyOnCellClick?: boolean
   footerClass?: string
+  rowClass?: RowClass | RowClassResolver
 }

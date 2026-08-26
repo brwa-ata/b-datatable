@@ -400,6 +400,7 @@
       :theme="props.theme"
       :itemKey="props.itemKey"
       :row-props="getRowProps"
+      :row-class="props.rowClass"
       @update:sort="handleSort"
       @update:currentItems="handleCurrentItems"
       @row:expand="handleExpand"
@@ -643,6 +644,7 @@ const props = withDefaults(defineProps<BDatatableProps>(), {
   copyOnCellClick: false,
   tableToolbarBgColor: '',
   footerClass: '',
+  rowClass: '',
 })
 
 const emit = defineEmits<{

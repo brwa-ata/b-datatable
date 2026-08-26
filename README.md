@@ -41,7 +41,8 @@ simple table props
   loading: { type: Boolean, default: false },
   localSort: { type: Boolean, default: false },
   localSearch: { type: Boolean, default: false },
-  rowProps: { type: Object, default: () => {} },
+  rowProps: { type: [Object, Function], default: () => {} },
+  rowClass: { type: [String, Array, Object, Function], default: '' },
   loadingText: { type: String, default: 'Loading...' },
   theme: {
     type: String,
@@ -56,6 +57,24 @@ simple table props
   virtualScrollBuffer: { type: Number, default: 5 },
 }
 ```
+
+| row class
+
+Use `rowClass` to add class(es) to body rows. Pass a static value, or a function that
+receives the row data and returns the class(es):
+
+```
+<BDatatable
+  :headers="headers"
+  :api-data="apiData"
+  :row-class="(item, index) => (item.quantity < 0 ? 'row--negative' : '')"
+/>
+```
+
+The function is called with `(item, index)` where `item` is the row data and `index` is the
+row index in the full item list. It may return a string, an array, or an object
+(`{ 'row--negative': item.quantity < 0 }`) — anything Vue's `:class` accepts.
+`rowClass` works the same on `BTable` and `BDatatable`.
 
 ## Project Setup
 
