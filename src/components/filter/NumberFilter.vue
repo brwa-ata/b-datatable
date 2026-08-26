@@ -207,7 +207,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 
 const props = defineProps({
   title: { type: String, required: true },
@@ -251,6 +251,15 @@ function onClickOutside(e: MouseEvent) {
 onMounted(() => document.addEventListener('click', onClickOutside))
 onUnmounted(() => document.removeEventListener('click', onClickOutside))
 
+watch(
+  () => searchValue.value,
+  (val) => {
+    if (val && String(val).length) return
+    // Input emptied by hand: only ask the parent to refetch when a filter is actually active.
+    if (filterApplied.value) clearFilter()
+    else symbol.value = '__eq'
+  },
+)
 function symbolChanged(val: string) {
   symbol.value = val
   showDropdown.value = false
@@ -262,9 +271,11 @@ function symbolChanged(val: string) {
 }
 
 function clearFilter() {
+  // Reset the flag before clearing the input so the watcher above sees no active
+  // filter and stays quiet instead of emitting a second time.
+  filterApplied.value = false
   symbol.value = '__eq'
   searchValue.value = null
-  filterApplied.value = false
   const columnQuery = props.column + symbol.value
   const foundSymbol = mathSymbols.value.find((el) => el.key === symbol.value)
   const data = { column: props.column, symbol: foundSymbol?.value, value: searchValue.value, columnQuery: columnQuery }
@@ -273,7 +284,13 @@ function clearFilter() {
 }
 
 function applyFilter() {
-  searchValue.value = onlyNumber(searchValue.value)
+  const numberValue = onlyNumber(searchValue.value)
+  if (numberValue === null || numberValue === '') {
+    if (filterApplied.value) clearFilter()
+    else searchValue.value = null
+    return
+  }
+  searchValue.value = numberValue
   const columnQuery = props.column + symbol.value
   const foundSymbol = mathSymbols.value.find((el) => el.key === symbol.value)
   const data = { column: props.column, symbol: foundSymbol?.value, value: searchValue.value, columnQuery: columnQuery }
