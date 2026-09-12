@@ -1068,18 +1068,20 @@ defineExpose({
     display: inline-flex;
     align-items: center;
     align-self: center;
+    height: 30px;
+    box-sizing: border-box;
     border: 1px solid;
     border-radius: 160px;
     gap: 8px;
-    padding: 3px;
+    padding: 1px 3px;
   }
 
   &__tool-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     padding: 0;
     background: transparent;
     border: none;
@@ -1211,6 +1213,7 @@ defineExpose({
     align-items: center;
     gap: 5px;
     height: 30px;
+    box-sizing: border-box;
     padding: 0 10px;
     border: 1px solid;
     border-radius: 16px;
@@ -1268,10 +1271,12 @@ defineExpose({
   &__pager {
     display: inline-flex;
     align-items: center;
+    height: 30px;
+    box-sizing: border-box;
     gap: 2px;
     border: 1px solid;
     border-radius: 160px;
-    padding: 2px 3px;
+    padding: 1px 3px;
   }
 
   &__pager-btn {
