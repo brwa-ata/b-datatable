@@ -103,13 +103,14 @@ import { ref, onMounted, onUnmounted, watch } from 'vue'
 const props = defineProps({
   title: { type: String, required: true },
   column: { type: String, required: true },
+  defaultSymbol: { type: String, default: '__istartswith' },
 })
 
 const emit = defineEmits(['count-filter', 'value-changed'])
 
 const dropdownWrapper = ref<HTMLDivElement | null>(null)
 const showDropdown = ref(false)
-const symbol = ref('__istartswith')
+const symbol = ref(props.defaultSymbol)
 const searchValue = ref('')
 const filterApplied = ref(false)
 const textFilterOptions = [
@@ -144,7 +145,7 @@ watch(
     if (val && val.length) return
     // Input emptied by hand: only ask the parent to refetch when a filter is actually active.
     if (filterApplied.value) clearFilter()
-    else symbol.value = '__istartswith'
+    else symbol.value = props.defaultSymbol
   },
 )
 
@@ -162,7 +163,7 @@ function clearFilter() {
   // Reset the flag before clearing the input so the watcher above sees no active
   // filter and stays quiet instead of emitting a second time.
   filterApplied.value = false
-  symbol.value = '__istartswith'
+  symbol.value = props.defaultSymbol
   searchValue.value = ''
   const columnQuery = props.column + symbol.value
   const foundSymbol = symbols.value.find((el) => el.key === symbol.value)

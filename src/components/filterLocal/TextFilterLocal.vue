@@ -87,6 +87,7 @@ import type { LocalTextSymbol } from './localFilter'
 const props = defineProps<{
   title: string
   columnKey: string
+  defaultSymbol?: LocalTextSymbol
 }>()
 
 const emit = defineEmits<{
@@ -130,7 +131,7 @@ function emitChange() {
 }
 
 function clearFilter() {
-  symbol.value = 'co'
+  symbol.value = props.defaultSymbol || 'co'
   searchValue.value = ''
   filterApplied.value = false
   emitChange()

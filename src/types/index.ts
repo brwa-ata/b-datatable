@@ -107,4 +107,5 @@ export default interface BDatatableProps {
   copyOnCellClick?: boolean
   footerClass?: string
   rowClass?: RowClass | RowClassResolver
+  defaultTextSymbol?: string
 }

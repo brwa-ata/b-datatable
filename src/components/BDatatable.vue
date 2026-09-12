@@ -484,6 +484,7 @@
                   v-if="column.filterType === 'text'"
                   :title="column.title"
                   :column-key="column.key"
+                  :default-symbol="column?.defaultSymbol ?? props.defaultTextSymbol"
                   @value-changed="applyLocalTextFilter"
                 />
                 <NumberFilterLocal
@@ -506,6 +507,7 @@
                   v-if="column.filterType === 'text'"
                   :title="column.title"
                   :column="column.column"
+                  :default-symbol="column?.defaultSymbol ?? props.defaultTextSymbol"
                   @value-changed="applyTextFilter"
                 />
                 <NumberFilter
@@ -645,6 +647,7 @@ const props = withDefaults(defineProps<BDatatableProps>(), {
   tableToolbarBgColor: '',
   footerClass: '',
   rowClass: '',
+  defaultTextSymbol: '__istartswith',
 })
 
 const emit = defineEmits<{
