@@ -205,10 +205,15 @@ const { containerRef, onScroll, totalHeight, offsetY, visibleItems } = useVirtua
   itemHeight: ITEM_HEIGHT,
 })
 
+// Toggling a row swaps the checked/unchecked <svg>, so by the time this listener
+// runs the clicked icon is already detached and `contains(e.target)` is false.
+// `composedPath()` is snapshotted when the event is dispatched, so it still holds
+// the original ancestors and tells us the click started inside the dropdown.
 function onClickOutside(e) {
-  if (dropdownWrapper.value && !dropdownWrapper.value.contains(e.target)) {
-    showDropdown.value = false
-  }
+  if (!dropdownWrapper.value) return
+  const path = typeof e.composedPath === 'function' ? e.composedPath() : []
+  if (path.includes(dropdownWrapper.value) || dropdownWrapper.value.contains(e.target)) return
+  showDropdown.value = false
 }
 
 onMounted(() => document.addEventListener('click', onClickOutside))
