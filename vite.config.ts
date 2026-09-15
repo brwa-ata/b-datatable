@@ -27,11 +27,14 @@ export default defineConfig(({ mode }) => {
           },
           cssCodeSplit: false,
           rollupOptions: {
-            external: ['vue'],
+            // b-date-input is a peer dependency: keep it out of the bundle so the host
+            // project's own copy (and its own stylesheet / theme) is used.
+            external: ['vue', 'b-date-input'],
             output: {
               exports: 'named',
               globals: {
                 vue: 'Vue',
+                'b-date-input': 'VueDateInput',
               },
               assetFileNames: 'b-datatable.[ext]',
             },

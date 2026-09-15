@@ -1,6 +1,6 @@
 {
   "name": "b-datatable",
-  "version": "2.0.17",
+  "version": "2.0.18",
   "type": "module",
   "exports": {
     ".": {
@@ -31,7 +31,13 @@
     "type-check": "vue-tsc --noEmit"
   },
   "peerDependencies": {
-    "vue": "^3.4.0"
+    "vue": "^3.4.0",
+    "b-date-input": ">=1.0.5"
+  },
+  "peerDependenciesMeta": {
+    "b-date-input": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
@@ -41,6 +47,7 @@
     "@vue/eslint-config-prettier": "^10.2.0",
     "@vue/eslint-config-typescript": "^14.7.0",
     "@vue/tsconfig": "^0.9.1",
+    "b-date-input": "github:brwa-ata/b-date-input",
     "eslint": "^9.39.1",
     "eslint-plugin-vue": "~10.5.1",
     "globals": "^16.5.0",

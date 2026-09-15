@@ -5,3 +5,9 @@ declare module '*.vue' {
   const component: DefineComponent
   export default component
 }
+
+declare module 'b-date-input' {
+  import type { DefineComponent } from 'vue'
+  export const DateInput: DefineComponent
+  export default DateInput
+}

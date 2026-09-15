@@ -12,7 +12,7 @@ export interface TableHeader {
   key: string
   sortable: boolean
   column?: string
-  filterType?: 'number' | 'text' | 'list' | 'id'
+  filterType?: 'number' | 'text' | 'list' | 'id' | 'date'
   list?: Array<object>
   align?: 'start' | 'center' | 'end'
   headerProps?: object
@@ -64,6 +64,17 @@ export interface BTableNumberFilter {
 export interface BTableListFilter {
   column: string
   values: unknown[]
+}
+
+/** Dates are 'YYYY-MM-DD'; both are null when the filter is cleared. */
+export interface BTableDateFilter {
+  column: string
+  after: string | null
+  before: string | null
+  /** `${column}_after` */
+  afterQuery: string
+  /** `${column}_before` */
+  beforeQuery: string
 }
 
 export default interface BDatatableProps {

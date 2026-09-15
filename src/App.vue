@@ -45,6 +45,7 @@
       @update:text-filter="handleUpdateTextFilter"
       @update:number-filter="handleUpdateNumberFilter"
       @update:list-filter="handleUpdateListFilter"
+      @update:date-filter="handleUpdateDateFilter"
       @update:sort="handleUpdateSort"
       @update:prev-page="handleUpdatePrevPage"
       @update:next-page="handleUpdateNextPage"
@@ -124,6 +125,7 @@ import type {
   BTableTextFilter,
   BTableNumberFilter,
   BTableListFilter,
+  BTableDateFilter,
   Theme,
 } from './types'
 
@@ -333,7 +335,7 @@ const headers = ref<TableHeader[]>([
     ],
     itemTitle: 'username',
   },
-  { title: 'Date', key: 'input_date', sortable: true, column: 'input_date' },
+  { title: 'Date', key: 'input_date', sortable: true, column: 'input_date', filterType: 'date' },
   { title: 'Created At', key: 'created_at', sortable: true, column: 'created_at' },
   {
     title: '',
@@ -558,6 +560,19 @@ function handleUpdateListFilter(obj: BTableListFilter) {
 
   if (obj.values.length) {
     queryParams.value[obj.column] = obj.values.join(',')
+  }
+
+  queryParams.value.page = 1
+  getData()
+}
+
+function handleUpdateDateFilter(obj: BTableDateFilter) {
+  delete queryParams.value[obj.afterQuery]
+  delete queryParams.value[obj.beforeQuery]
+
+  if (obj.after && obj.before) {
+    queryParams.value[obj.afterQuery] = obj.after
+    queryParams.value[obj.beforeQuery] = obj.before
   }
 
   queryParams.value.page = 1

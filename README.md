@@ -8,6 +8,44 @@ npm install git+https://github.com/brwa-ata/b-datatable.git --force
 
 after this command you should restart the vue dev server
 
+`filterType: 'date'` uses [b-date-input](https://github.com/brwa-ata/b-date-input), which is a peer
+dependency and is **not** bundled into b-datatable. The project must install it and load its styles once
+(skip the CSS import if you already theme it through its SCSS):
+
+```
+npm install git+https://github.com/brwa-ata/b-date-input.git --force
+```
+
+```
+import 'b-date-input/style.css'
+```
+
+## Date filter
+
+Set `filterType: 'date'` on a header to get a date-range filter. Picking both dates (or clearing them)
+emits `update:date-filter`:
+
+```
+{ title: 'Date', key: 'input_date', column: 'input_date', sortable: true, filterType: 'date' }
+```
+
+```
+<BDatatable :headers="headers" @update:date-filter="handleDateFilter" />
+
+function handleDateFilter(obj) {
+  // obj = { column: 'input_date', after: '2026-01-01', before: '2026-01-31',
+  //         afterQuery: 'input_date_after', beforeQuery: 'input_date_before' }
+  // after / before are null when the filter is cleared
+  delete queryParams[obj.afterQuery]
+  delete queryParams[obj.beforeQuery]
+  if (obj.after && obj.before) {
+    queryParams[obj.afterQuery] = obj.after
+    queryParams[obj.beforeQuery] = obj.before
+  }
+  getData()
+}
+```
+
 ## How to use
 
 | simple table with local sort, filter and search

@@ -526,6 +526,13 @@
                   :list="column.list"
                   @value-changed="applyListFilter"
                 />
+                <DateFilter
+                  v-else-if="column.filterType === 'date'"
+                  :title="column.title"
+                  :column="column.column"
+                  :theme="props.theme"
+                  @value-changed="applyDateFilter"
+                />
               </template>
             </td>
           </template>
@@ -588,6 +595,7 @@ import BTable from './BTable.vue'
 import TextFilter from './filter/TextFilter.vue'
 import NumberFilter from './filter/NumberFilter.vue'
 import ListFilter from './filter/ListFilter.vue'
+import DateFilter from './filter/DateFilter.vue'
 import TextFilterLocal from './filterLocal/TextFilterLocal.vue'
 import NumberFilterLocal from './filterLocal/NumberFilterLocal.vue'
 import ListFilterLocal from './filterLocal/ListFilterLocal.vue'
@@ -600,6 +608,7 @@ import {
 } from './filterLocal/localFilter'
 import type BDatatableProps from '../types'
 import type {
+  BTableDateFilter,
   BTableListFilter,
   BTableNumberFilter,
   BTablePerPage,
@@ -655,6 +664,7 @@ const emit = defineEmits<{
   'update:text-filter': [obj: BTableTextFilter]
   'update:number-filter': [obj: BTableNumberFilter]
   'update:list-filter': [obj: BTableListFilter]
+  'update:date-filter': [obj: BTableDateFilter]
   'update:sort': [obj: BTableSort]
   'update:prev-page': [page: number]
   'update:next-page': [page: number]
@@ -932,6 +942,9 @@ function applyNumberFilter(obj: BTableNumberFilter) {
 }
 function applyListFilter(obj: BTableListFilter) {
   emit('update:list-filter', obj)
+}
+function applyDateFilter(obj: BTableDateFilter) {
+  emit('update:date-filter', obj)
 }
 function handleSort(obj: BTableSort) {
   emit('update:sort', obj)
