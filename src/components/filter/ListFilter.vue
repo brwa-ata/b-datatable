@@ -174,7 +174,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useVirtualList } from '../useVirtualList'
 
 // Keep in sync with the `.lf__list-item` height in the stylesheet below.
@@ -185,15 +185,20 @@ const prop = defineProps({
   column: { type: String, required: true },
   itemTitle: { type: String, default: 'name' },
   itemValue: { type: String, default: 'id' },
+  // Restored state (see BDatatable's `storeFiltersInLocalStorage`). Rendered as an
+  // already-applied selection; the parent restored it from storage and knows it, so
+  // nothing is emitted for it.
+  initialLookup: { type: String, default: 'in' },
+  initialValues: { type: Array, default: () => [] },
 })
 
 const emit = defineEmits(['count-filter', 'value-changed'])
 
 const dropdownWrapper = ref(null)
 const showDropdown = ref(false)
-const selectedItems = ref([])
+const selectedItems = ref([...prop.initialValues])
 const searchText = ref('')
-const lookup = ref('in')
+const lookup = ref(prop.initialLookup)
 
 const filteredList = computed(() => {
   if (!searchText.value) return prop.list
@@ -218,6 +223,17 @@ function onClickOutside(e) {
 
 onMounted(() => document.addEventListener('click', onClickOutside))
 onUnmounted(() => document.removeEventListener('click', onClickOutside))
+
+// `checked` lives on the list items themselves, and the list is usually filled by an
+// async store call, so the tick marks are (re)written from the applied selection every
+// time the array arrives or is replaced -- that is what makes a restored selection show
+// up, and what clears the ticks of a list shared with another table.
+watch(() => prop.list, syncCheckedWithSelection, { immediate: true })
+
+function syncCheckedWithSelection() {
+  const selected = new Set(selectedItems.value.map((value) => String(value)))
+  prop.list.forEach((item) => (item.checked = selected.has(String(item[prop.itemValue]))))
+}
 
 function toggleDropDown() {
   showDropdown.value = !showDropdown.value

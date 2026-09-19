@@ -46,6 +46,56 @@ function handleDateFilter(obj) {
 }
 ```
 
+## Remembering filters (localStorage)
+
+`storeTableHeaderInLocalStorage` remembers which columns are shown and in what order.
+`storeFiltersInLocalStorage` remembers what the table is **filtered** and **sorted** by, so a
+browser refresh (or coming back to the page later) brings the same rows back instead of an
+empty filter row. Both read the same name and must be given one:
+
+```
+<BDatatable
+  :headers="headers"
+  :api-data="apiData"
+  store-table-header-in-local-storage
+  store-filters-in-local-storage
+  table-header-local-storage-name="orders_table"
+  @filters:restored="handleFiltersRestored"
+  @update:text-filter="handleTextFilter"
+  ...
+/>
+```
+
+The filter row is stored under `<name>_filters`. Give every table its own name: two tables
+sharing one name share their filters.
+
+On load the table fills its own filter inputs from storage and emits **`filters:restored`** once,
+with the same objects the `update:*-filter` and `update:sort` events emit. The table does not
+fetch anything — feed the payload through the handlers already written for those events, without
+requesting, and let the first request go out filtered:
+
+```
+function handleFiltersRestored(obj) {
+  // obj = { text: [...], number: [...], list: [...], date: [...], sort: { column, direction } | null }
+  obj.text.forEach(applyTextFilter)
+  obj.number.forEach(applyNumberFilter)
+  obj.list.forEach(applyListFilter)
+  obj.date.forEach(applyDateFilter)
+  if (obj.sort) applySort(obj.sort)
+}
+```
+
+It is emitted while the table is being created, before the host's `onMounted`, so the query params
+are ready in time for the first request. Nothing is emitted when there is nothing stored.
+
+Two details worth knowing:
+
+- A filter whose column is no longer in `headers` is dropped on load. It has no input to show it,
+  and a table filtered by a column nobody can see is worse than a lost filter.
+- The reset button clears the stored filters and empties the filter row along with them. Hosts that
+  do not switch `storeFiltersInLocalStorage` on keep the old behaviour, where reset only emits
+  `click:reset`.
+
 ## How to use
 
 | simple table with local sort, filter and search

@@ -104,15 +104,20 @@ const props = defineProps({
   title: { type: String, required: true },
   column: { type: String, required: true },
   defaultSymbol: { type: String, default: '__istartswith' },
+  // Restored state (see BDatatable's `storeFiltersInLocalStorage`). Rendered as an
+  // already-applied filter; the parent restored it from storage and knows it, so
+  // nothing is emitted for it.
+  initialSymbol: { type: String, default: '' },
+  initialValue: { type: String, default: '' },
 })
 
 const emit = defineEmits(['count-filter', 'value-changed'])
 
 const dropdownWrapper = ref<HTMLDivElement | null>(null)
 const showDropdown = ref(false)
-const symbol = ref(props.defaultSymbol)
-const searchValue = ref('')
-const filterApplied = ref(false)
+const symbol = ref(props.initialSymbol || props.defaultSymbol)
+const searchValue = ref(props.initialValue)
+const filterApplied = ref(!!props.initialValue)
 const textFilterOptions = [
   { title: 'Start with', value: '__istartswith' },
   { title: 'End with', value: '__iendswith' },

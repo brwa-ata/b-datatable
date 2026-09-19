@@ -86,7 +86,7 @@
 <script setup lang="ts">
 // `b-date-input` is a peer dependency kept external in the lib build, so the host
 // project's own copy (and its own stylesheet / theme) is the one rendered here.
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, type PropType } from 'vue'
 import { DateInput } from 'b-date-input'
 import type { BTableDateFilter } from '../../types'
 
@@ -97,13 +97,18 @@ const props = defineProps({
   column: { type: String, required: true },
   theme: { type: String, default: 'light' },
   format: { type: String, default: 'dd/mm/yyyy' },
+  // Restored state (see BDatatable's `storeFiltersInLocalStorage`). Rendered as an
+  // already-applied range; the parent restored it from storage and knows it, so
+  // nothing is emitted for it.
+  initialAfter: { type: String as PropType<string | null>, default: null },
+  initialBefore: { type: String as PropType<string | null>, default: null },
 })
 
 const emit = defineEmits(['count-filter', 'value-changed'])
 
 const rootRef = ref<HTMLElement | null>(null)
-const range = ref<DateRange>([null, null])
-const filterApplied = ref(false)
+const range = ref<DateRange>([props.initialAfter, props.initialBefore])
+const filterApplied = ref(!!(props.initialAfter && props.initialBefore))
 // Whether the calendar was open when the trigger was pressed; DateInput closes it
 // on that same mousedown, so the click that follows must not reopen it.
 let wasOpen = false

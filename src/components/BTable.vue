@@ -303,6 +303,9 @@ const props = defineProps({
   showSelect: { type: Boolean, default: false },
   // When true, a single click on a cell copies its displayed text to the clipboard (with a flash animation)
   copyOnCellClick: { type: Boolean, default: false },
+  // The sorted column to show as already sorted, e.g. { column: 'id', direction: 'desc' }.
+  // BDatatable feeds its restored sort through here; null clears the indicator.
+  initialSort: { type: Object, default: null },
 })
 
 const emit = defineEmits([
@@ -325,6 +328,17 @@ const borderConfig = computed(() => ({
 
 // Store sort state for each column: null (no sort), 'asc', or 'desc'
 const sortState = ref({})
+
+// Follow `initialSort` rather than reading it once: BDatatable rewrites it when a
+// stored sort is restored on load and clears it when the reset button is pressed.
+// A click on a header sets the same value here first, so this only ever re-applies.
+watch(
+  () => props.initialSort,
+  (val) => {
+    sortState.value = val?.column && val?.direction ? { [val.column]: val.direction } : {}
+  },
+  { immediate: true },
+)
 
 // Expanded rows
 const expandedRows = ref([])

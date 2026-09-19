@@ -77,6 +77,32 @@ export interface BTableDateFilter {
   beforeQuery: string
 }
 
+/**
+ * The filter state persisted to localStorage when `storeFiltersInLocalStorage`
+ * is on. Each map is keyed by the header's `column`; a cleared filter drops its
+ * entry instead of storing an empty one.
+ */
+export interface BTableStoredFilters {
+  text: Record<string, BTableTextFilter>
+  number: Record<string, BTableNumberFilter>
+  list: Record<string, BTableListFilter>
+  date: Record<string, BTableDateFilter>
+  sort: BTableSort | null
+}
+
+/**
+ * What `filters:restored` hands back on load: the same objects the individual
+ * `update:*-filter` / `update:sort` events emit, so the host can feed them
+ * through the very same handlers and build its query params in one go.
+ */
+export interface BTableRestoredFilters {
+  text: Array<BTableTextFilter>
+  number: Array<BTableNumberFilter>
+  list: Array<BTableListFilter>
+  date: Array<BTableDateFilter>
+  sort: BTableSort | null
+}
+
 export default interface BDatatableProps {
   hover?: boolean
   density?: 'default' | 'comfortable' | 'compact'
@@ -101,6 +127,8 @@ export default interface BDatatableProps {
   localSort?: boolean
   localFilter?: boolean
   storeTableHeaderInLocalStorage?: boolean
+  /** Persist the filter row and the sort column under `tableHeaderLocalStorageName`. */
+  storeFiltersInLocalStorage?: boolean
   showResetBtn?: boolean
   showSearchBtn?: boolean
   showPrintBtn?: boolean

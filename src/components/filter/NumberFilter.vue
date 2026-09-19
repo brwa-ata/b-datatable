@@ -215,16 +215,21 @@ const props = defineProps({
   columns: { type: Array, default: () => [] },
   complex: { type: Boolean, default: false },
   query: { type: String, default: '' },
+  // Restored state (see BDatatable's `storeFiltersInLocalStorage`). Rendered as an
+  // already-applied filter; the parent restored it from storage and knows it, so
+  // nothing is emitted for it.
+  initialSymbol: { type: String, default: '' },
+  initialValue: { type: [String, Number], default: null },
 })
 
 const emit = defineEmits(['count-filter', 'value-changed'])
 
 const dropdownWrapper = ref<HTMLElement | null>(null)
 const showDropdown = ref(false)
-const symbol = ref('__eq')
+const symbol = ref(props.initialSymbol || '__eq')
 
-const searchValue = ref<string | number | null>(null)
-const filterApplied = ref(false)
+const searchValue = ref<string | number | null>(props.initialValue)
+const filterApplied = ref(props.initialValue !== null && props.initialValue !== '')
 const numberFilterOptions = ref([
   { label: 'Equal', value: '__eq' },
   { label: 'Greater than', value: '__gt' },

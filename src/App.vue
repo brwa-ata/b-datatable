@@ -33,6 +33,7 @@
       density="compact"
       :use-virtual-scroll="true"
       store-table-header-in-local-storage
+      store-filters-in-local-storage
       table-header-local-storage-name="my-stock-header"
       show-select
       @click:export-to-excel="handleExportToExcel()"
@@ -51,6 +52,7 @@
       @update:next-page="handleUpdateNextPage"
       @update:per-page="handleUpdatePerPage"
       @update:checked="handleUpdateChecked"
+      @filters:restored="handleFiltersRestored"
     >
       <template #invoice_no="{ item }">
         <span style="color: #2196f3">{{ item.invoice_no }}</span>
@@ -118,6 +120,7 @@
 import { computed, onMounted, ref } from 'vue'
 import BDatatable from './components/BDatatable.vue'
 import type {
+  BTableRestoredFilters,
   TableHeader,
   TableResult,
   BTableSort,
@@ -495,7 +498,18 @@ function formatDate(dateString: string) {
   return `${day}/${month}/${year}`
 }
 
-function handleUpdateTextFilter(obj: BTableTextFilter) {
+// The restore payload goes through the same handlers as the live events, minus the
+// refetch: the table emits it before this component's onMounted, so the first request
+// already carries the stored filters.
+function handleFiltersRestored(obj: BTableRestoredFilters) {
+  obj.text.forEach(applyTextFilter)
+  obj.number.forEach(applyNumberFilter)
+  obj.list.forEach(applyListFilter)
+  obj.date.forEach(applyDateFilter)
+  if (obj.sort) applySort(obj.sort)
+}
+
+function applyTextFilter(obj: BTableTextFilter) {
   // check if incoming object exist
   for (let param in queryParams.value) {
     const lastIndex = param.lastIndexOf('__')
@@ -518,12 +532,9 @@ function handleUpdateTextFilter(obj: BTableTextFilter) {
   if (obj.value !== null) {
     queryParams.value[obj.columnQuery] = obj.value
   }
-
-  queryParams.value.page = 1
-  getData()
 }
 
-function handleUpdateNumberFilter(obj: BTableNumberFilter) {
+function applyNumberFilter(obj: BTableNumberFilter) {
   // check if incoming object exist
   for (let param in queryParams.value) {
     const lastIndex = param.lastIndexOf('__')
@@ -545,12 +556,9 @@ function handleUpdateNumberFilter(obj: BTableNumberFilter) {
   if (obj.value !== null) {
     queryParams.value[obj.columnQuery] = obj.value
   }
-
-  queryParams.value.page = 1
-  getData()
 }
 
-function handleUpdateListFilter(obj: BTableListFilter) {
+function applyListFilter(obj: BTableListFilter) {
   // remove existing filter on incoming column
   for (const param in queryParams.value) {
     if (obj.column.includes(param)) {
@@ -561,12 +569,9 @@ function handleUpdateListFilter(obj: BTableListFilter) {
   if (obj.values.length) {
     queryParams.value[obj.column] = obj.values.join(',')
   }
-
-  queryParams.value.page = 1
-  getData()
 }
 
-function handleUpdateDateFilter(obj: BTableDateFilter) {
+function applyDateFilter(obj: BTableDateFilter) {
   delete queryParams.value[obj.afterQuery]
   delete queryParams.value[obj.beforeQuery]
 
@@ -574,12 +579,9 @@ function handleUpdateDateFilter(obj: BTableDateFilter) {
     queryParams.value[obj.afterQuery] = obj.after
     queryParams.value[obj.beforeQuery] = obj.before
   }
-
-  queryParams.value.page = 1
-  getData()
 }
 
-function handleUpdateSort(obj: BTableSort) {
+function applySort(obj: BTableSort) {
   if (obj?.column && obj?.direction) {
     if (obj.direction === 'asc') {
       queryParams.value.ordering = obj.column
@@ -589,6 +591,34 @@ function handleUpdateSort(obj: BTableSort) {
   } else {
     queryParams.value.ordering = '-id'
   }
+}
+
+function handleUpdateTextFilter(obj: BTableTextFilter) {
+  applyTextFilter(obj)
+  queryParams.value.page = 1
+  getData()
+}
+
+function handleUpdateNumberFilter(obj: BTableNumberFilter) {
+  applyNumberFilter(obj)
+  queryParams.value.page = 1
+  getData()
+}
+
+function handleUpdateListFilter(obj: BTableListFilter) {
+  applyListFilter(obj)
+  queryParams.value.page = 1
+  getData()
+}
+
+function handleUpdateDateFilter(obj: BTableDateFilter) {
+  applyDateFilter(obj)
+  queryParams.value.page = 1
+  getData()
+}
+
+function handleUpdateSort(obj: BTableSort) {
+  applySort(obj)
   getData()
 }
 

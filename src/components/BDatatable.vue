@@ -401,6 +401,7 @@
       :itemKey="props.itemKey"
       :row-props="getRowProps"
       :row-class="props.rowClass"
+      :initial-sort="storedFilters.sort"
       @update:sort="handleSort"
       @update:currentItems="handleCurrentItems"
       @row:expand="handleExpand"
@@ -505,32 +506,44 @@
               <template v-else>
                 <TextFilter
                   v-if="column.filterType === 'text'"
+                  :key="`text-${column.key}-${filterEpoch}`"
                   :title="column.title"
                   :column="column.column"
                   :default-symbol="column?.defaultSymbol ?? props.defaultTextSymbol"
+                  :initial-symbol="storedTextSymbol(column.column)"
+                  :initial-value="storedFilters.text[column.column ?? '']?.value ?? ''"
                   @value-changed="applyTextFilter"
                 />
                 <NumberFilter
                   v-else-if="column.filterType === 'number'"
+                  :key="`number-${column.key}-${filterEpoch}`"
                   :title="column.title"
                   :column="column.column"
                   :columns="column.columns ? column.columns : []"
                   :complex="column.complex ? column.complex : false"
+                  :initial-symbol="storedNumberSymbol(column.column)"
+                  :initial-value="storedFilters.number[column.column ?? '']?.value ?? null"
                   @value-changed="applyNumberFilter"
                 />
                 <ListFilter
                   v-else-if="column.filterType === 'list' && column.list && column.list.length"
+                  :key="`list-${column.key}-${filterEpoch}`"
                   :column="column.column"
                   :item-title="column.itemTitle"
                   :item-value="column.itemValue"
                   :list="column.list"
+                  :initial-lookup="storedListLookup(column.column)"
+                  :initial-values="storedFilters.list[column.column ?? '']?.values ?? []"
                   @value-changed="applyListFilter"
                 />
                 <DateFilter
                   v-else-if="column.filterType === 'date'"
+                  :key="`date-${column.key}-${filterEpoch}`"
                   :title="column.title"
                   :column="column.column"
                   :theme="props.theme"
+                  :initial-after="storedFilters.date[column.column ?? '']?.after ?? null"
+                  :initial-before="storedFilters.date[column.column ?? '']?.before ?? null"
                   @value-changed="applyDateFilter"
                 />
               </template>
@@ -612,7 +625,9 @@ import type {
   BTableListFilter,
   BTableNumberFilter,
   BTablePerPage,
+  BTableRestoredFilters,
   BTableSort,
+  BTableStoredFilters,
   BTableTextFilter,
   TableHeader,
 } from '../types'
@@ -641,6 +656,7 @@ const props = withDefaults(defineProps<BDatatableProps>(), {
   localSort: false,
   localFilter: false,
   storeTableHeaderInLocalStorage: false,
+  storeFiltersInLocalStorage: false,
   showResetBtn: true,
   showSearchBtn: true,
   showPrintBtn: true,
@@ -670,6 +686,7 @@ const emit = defineEmits<{
   'update:next-page': [page: number]
   'update:per-page': [obj: BTablePerPage]
   'update:headers': [headers: TableHeader[]]
+  'filters:restored': [obj: BTableRestoredFilters]
   'click:reset': []
   'click:search': []
   'click:print': []
@@ -703,6 +720,132 @@ const hiddenColumns = ref<Set<string>>(new Set())
 const columnOrder = ref<Array<string>>([])
 const dragSourceIndex = ref<number | null>(null)
 const dragOverIndex = ref<number | null>(null)
+
+// ============================================
+// Stored filters (localStorage)
+// ============================================
+// The filter row and the sorted column are the table's own state, so the table is
+// what saves them -- under the same name the column layout uses, suffixed
+// `_filters`. On load they are read back twice over: fed to the filter inputs so
+// the header shows what is applied, and emitted once as `filters:restored` so the
+// host can rebuild its query params and fire a single, already-filtered request.
+
+const filterEpoch = ref(0)
+
+function emptyStoredFilters(): BTableStoredFilters {
+  return { text: {}, number: {}, list: {}, date: {}, sort: null }
+}
+
+const filtersStorageKey = computed(() =>
+  props.storeFiltersInLocalStorage && props.tableHeaderLocalStorageName
+    ? `${props.tableHeaderLocalStorageName}_filters`
+    : null,
+)
+
+// A filter is keyed by the column it queries; the list filter's own key carries the
+// lookup (`status__in`), which is dropped so the stored key matches `header.column`.
+function listBaseColumn(column: string) {
+  return column.replace(/__(not_)?in$/, '')
+}
+
+function loadStoredFilters(): BTableStoredFilters {
+  const stored = emptyStoredFilters()
+  if (!filtersStorageKey.value) return stored
+
+  let saved: Partial<BTableStoredFilters> | null = null
+  try {
+    saved = JSON.parse(localStorage.getItem(filtersStorageKey.value) ?? 'null')
+  } catch {
+    saved = null
+  }
+  if (!saved) return stored
+
+  // Only keep what the table still shows. A column dropped from `headers` since the
+  // filter was saved has no input to display it, and silently filtering a table by a
+  // column nobody can see is worse than losing the filter.
+  const columns = new Set(props.headers.map((header) => header.column).filter(Boolean))
+  const keys = new Set(props.headers.map((header) => header.key))
+
+  for (const [column, filter] of Object.entries(saved.text ?? {})) {
+    if (columns.has(column) && filter?.value) stored.text[column] = filter
+  }
+  for (const [column, filter] of Object.entries(saved.number ?? {})) {
+    if (columns.has(column) && filter?.value !== null && filter?.value !== undefined) stored.number[column] = filter
+  }
+  for (const [column, filter] of Object.entries(saved.list ?? {})) {
+    if (columns.has(column) && filter?.values?.length) stored.list[column] = filter
+  }
+  for (const [column, filter] of Object.entries(saved.date ?? {})) {
+    if (columns.has(column) && filter?.after && filter?.before) stored.date[column] = filter
+  }
+  if (saved.sort?.column && saved.sort?.direction && keys.has(saved.sort.column)) stored.sort = saved.sort
+
+  return stored
+}
+
+const storedFilters = ref<BTableStoredFilters>(loadStoredFilters())
+
+function saveStoredFilters() {
+  if (!filtersStorageKey.value) return
+  try {
+    localStorage.setItem(filtersStorageKey.value, JSON.stringify(storedFilters.value))
+  } catch {
+    // private mode / quota: the table keeps working, it just will not remember
+  }
+}
+
+function clearStoredFilters() {
+  // Opt-in only: a host that does not store its filters may well be treating the
+  // button as the plain refresh its tooltip calls it, and keeping its filters.
+  if (!props.storeFiltersInLocalStorage) return
+
+  storedFilters.value = emptyStoredFilters()
+  // Remount the filter inputs so the header row empties along with the query.
+  filterEpoch.value += 1
+  if (!filtersStorageKey.value) return
+  try {
+    localStorage.removeItem(filtersStorageKey.value)
+  } catch {
+    //
+  }
+}
+
+// The lookup the input was left on (`__icontains`, `__gte`, ...) is the tail of the
+// stored `columnQuery`, so nothing but the emitted object has to be kept.
+function storedLookup(filter: BTableTextFilter | BTableNumberFilter | undefined) {
+  return filter ? filter.columnQuery.slice(filter.column.length) : ''
+}
+
+function storedTextSymbol(column?: string) {
+  return storedLookup(storedFilters.value.text[column ?? ''])
+}
+
+function storedNumberSymbol(column?: string) {
+  return storedLookup(storedFilters.value.number[column ?? ''])
+}
+
+function storedListLookup(column?: string) {
+  return storedFilters.value.list[column ?? '']?.column.endsWith('__not_in') ? 'not_in' : 'in'
+}
+
+// Emitted from setup() rather than onMounted(): the host turns this payload into its
+// query params and sends the first request from its own onMounted, which runs later.
+// The filter inputs mount later still (`columnOrder` is only filled on mount), so
+// waiting for them would cost an unfiltered request and a flash of unfiltered rows.
+function emitRestoredFilters() {
+  const restored: BTableRestoredFilters = {
+    text: Object.values(storedFilters.value.text),
+    number: Object.values(storedFilters.value.number),
+    list: Object.values(storedFilters.value.list),
+    date: Object.values(storedFilters.value.date),
+    sort: storedFilters.value.sort,
+  }
+  const hasFilter =
+    restored.text.length || restored.number.length || restored.list.length || restored.date.length || restored.sort
+  if (hasFilter) emit('filters:restored', restored)
+}
+
+emitRestoredFilters()
 
 function loadHiddenColumns() {
   if (!props.storeTableHeaderInLocalStorage || !props.tableHeaderLocalStorageName) return
@@ -800,6 +943,10 @@ function nextPage() {
 }
 
 function handleReset() {
+  // Reset empties the query on the host's side, so the header row and what is stored
+  // for the next load have to go with it, or the table would come back filtered by
+  // something the user had just cleared.
+  clearStoredFilters()
   emit('click:reset')
 }
 
@@ -934,19 +1081,36 @@ function applyLocalListFilter({ key, lookup, values }: { key: string; lookup: Lo
   setLocalFilter(key, values.length ? { type: 'list', lookup, values } : null)
 }
 
+// Each of these stores the very object it emits, so what comes back on the next load
+// needs no translating; a cleared filter drops its entry instead of storing a blank.
 function applyTextFilter(obj: BTableTextFilter) {
+  if (obj.value) storedFilters.value.text[obj.column] = obj
+  else delete storedFilters.value.text[obj.column]
+  saveStoredFilters()
   emit('update:text-filter', obj)
 }
 function applyNumberFilter(obj: BTableNumberFilter) {
+  if (obj.value !== null && obj.value !== '') storedFilters.value.number[obj.column] = obj
+  else delete storedFilters.value.number[obj.column]
+  saveStoredFilters()
   emit('update:number-filter', obj)
 }
 function applyListFilter(obj: BTableListFilter) {
+  const column = listBaseColumn(obj.column)
+  if (obj.values.length) storedFilters.value.list[column] = obj
+  else delete storedFilters.value.list[column]
+  saveStoredFilters()
   emit('update:list-filter', obj)
 }
 function applyDateFilter(obj: BTableDateFilter) {
+  if (obj.after && obj.before) storedFilters.value.date[obj.column] = obj
+  else delete storedFilters.value.date[obj.column]
+  saveStoredFilters()
   emit('update:date-filter', obj)
 }
 function handleSort(obj: BTableSort) {
+  storedFilters.value.sort = obj?.column && obj?.direction ? { column: obj.column, direction: obj.direction } : null
+  saveStoredFilters()
   emit('update:sort', obj)
 }
 
