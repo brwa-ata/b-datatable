@@ -147,7 +147,8 @@ function applyFilter() {
 
 <style lang="scss" scoped>
 .tfl {
-  width: 150px;
+  width: 100%;
+  min-width: 90px;
   height: 100%;
 
   &__row {
@@ -219,6 +220,9 @@ function applyFilter() {
   &__input {
     flex: 1;
     min-width: 0;
+    // zero basis: the input fills the cell without its default ~150px
+    // intrinsic width pushing the column wider than its header
+    width: 0;
     outline: none;
     border: none;
     background: transparent;

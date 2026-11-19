@@ -185,7 +185,7 @@ function rangeChanged(val: DateRange | null) {
 <style lang="scss" scoped>
 .df {
   position: relative;
-  min-width: 100px;
+  width: 100%;
   height: 100%;
   display: flex;
   align-items: center;

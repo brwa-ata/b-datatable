@@ -319,7 +319,8 @@ function onlyNumber(val: string | number | null): number | string | null {
 
 <style lang="scss" scoped>
 .nf {
-  width: 100px;
+  width: 100%;
+  min-width: 80px;
   height: 100%;
 
   &__row {
@@ -403,6 +404,9 @@ function onlyNumber(val: string | number | null): number | string | null {
   &__input {
     flex: 1;
     min-width: 0;
+    // zero basis: the input fills the cell without its default ~150px
+    // intrinsic width pushing the column wider than its header
+    width: 0;
     outline: none;
     border: none;
     background: transparent;

@@ -243,7 +243,8 @@ function applyFilter() {
 
 <style lang="scss" scoped>
 .lfl {
-  width: 100px;
+  width: 100%;
+  min-width: 70px;
   position: relative;
   height: 100%;
 
@@ -277,6 +278,9 @@ function applyFilter() {
   &__display-input {
     flex: 1;
     min-width: 0;
+    // zero basis: the input fills the cell without its default ~150px
+    // intrinsic width pushing the column wider than its header
+    width: 0;
     outline: none;
     border: none;
     background: transparent;
