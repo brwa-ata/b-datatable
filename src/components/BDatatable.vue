@@ -604,7 +604,7 @@
           <td
             v-for="(footer, footerIndex) in visibleHeaders"
             :key="footerIndex"
-            :style="`background-color: ${props.headerRowBgColor}`"
+            :style="{ backgroundColor: props.headerRowBgColor, ...(footer.align ? { textAlign: footer.align } : {}) }"
             :class="props.footerClass"
           >
             <div v-if="footer.key === 'counter_column'" />

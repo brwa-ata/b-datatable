@@ -77,7 +77,10 @@
               :class="{ b__sortable: header.sortable }"
               @click="header.sortable ? toggleSort(header.key) : null"
             >
-              <div class="b__header-content">
+              <div
+                class="b__header-content"
+                :style="header.align ? { justifyContent: header.align } : undefined"
+              >
                 <slot
                   :name="`header.${header.key}`"
                   :header="header"
@@ -208,6 +211,7 @@
                 v-for="header in props.headers"
                 :key="header.key"
                 v-bind="header.cellProps"
+                :style="header.align ? { textAlign: header.align } : undefined"
               >
                 <slot
                   :name="`item.${header.key}`"
