@@ -35,8 +35,8 @@
       <input
         readonly
         class="lf__display-input"
-        :value="selectedItems.length ? `${selectedItems.length} selected` : ''"
-        :placeholder="selectedItems.length ? '' : 'Search...'"
+        :value="selectedItems.length ? t('selected', { count: selectedItems.length }) : ''"
+        :placeholder="selectedItems.length ? '' : t('searchPlaceholder')"
       />
     </div>
 
@@ -60,7 +60,7 @@
               value="in"
               class="lf__seg-input"
             />
-            In
+            {{ t('in') }}
           </label>
           <label
             class="lf__seg"
@@ -72,7 +72,7 @@
               value="not_in"
               class="lf__seg-input"
             />
-            Not In
+            {{ t('notIn') }}
           </label>
         </div>
         <div class="lf__actions">
@@ -81,14 +81,14 @@
             type="button"
             @click="clearFilter()"
           >
-            Clear
+            {{ t('clear') }}
           </button>
           <button
             class="lf__btn lf__btn--apply"
             type="button"
             @click="applyFilter()"
           >
-            Filter
+            {{ t('filter') }}
           </button>
         </div>
       </div>
@@ -100,7 +100,7 @@
           :id="`list-filter-search-input__${prop.column}`"
           type="search"
           class="lf__search-input"
-          placeholder="Search..."
+          :placeholder="t('searchPlaceholder')"
           autocomplete="off"
         />
       </div>
@@ -176,6 +176,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useVirtualList } from '../useVirtualList'
+import { useLocale } from '../../i18n'
 
 // Keep in sync with the `.lf__list-item` height in the stylesheet below.
 const ITEM_HEIGHT = 32
@@ -193,6 +194,7 @@ const prop = defineProps({
 })
 
 const emit = defineEmits(['count-filter', 'value-changed'])
+const { t } = useLocale()
 
 const dropdownWrapper = ref(null)
 const showDropdown = ref(false)
@@ -290,7 +292,7 @@ function applyFilter() {
     width: 24px;
     height: 24px;
     flex-shrink: 0;
-    margin-right: 4px;
+    margin-inline-end: 4px;
     padding: 0;
     background: transparent;
     border: none;
@@ -317,7 +319,7 @@ function applyFilter() {
   &__dropdown {
     position: absolute;
     top: calc(100% + 4px);
-    left: 0;
+    inset-inline-start: 0;
     z-index: 1000;
     min-width: 240px;
     max-width: 300px;
@@ -465,8 +467,7 @@ function applyFilter() {
   &__list-window {
     position: absolute;
     top: 0;
-    left: 0;
-    right: 0;
+    inset-inline: 0;
     will-change: transform;
   }
 

@@ -28,8 +28,8 @@
       <input
         readonly
         class="lfl__display-input"
-        :value="selected.size ? `${selected.size} selected` : ''"
-        :placeholder="selected.size ? '' : 'Search...'"
+        :value="selected.size ? t('selected', { count: selected.size }) : ''"
+        :placeholder="selected.size ? '' : t('searchPlaceholder')"
       />
     </div>
 
@@ -53,7 +53,7 @@
               value="in"
               class="lfl__seg-input"
             />
-            In
+            {{ t('in') }}
           </label>
           <label
             class="lfl__seg"
@@ -65,7 +65,7 @@
               value="not_in"
               class="lfl__seg-input"
             />
-            Not In
+            {{ t('notIn') }}
           </label>
         </div>
         <div class="lfl__actions">
@@ -74,14 +74,14 @@
             type="button"
             @click="clearFilter()"
           >
-            Clear
+            {{ t('clear') }}
           </button>
           <button
             class="lfl__btn lfl__btn--apply"
             type="button"
             @click="applyFilter()"
           >
-            Filter
+            {{ t('filter') }}
           </button>
         </div>
       </div>
@@ -93,7 +93,7 @@
           :id="`list-filter-local-input__${props.columnKey}`"
           type="search"
           class="lfl__search-input"
-          placeholder="Search..."
+          :placeholder="t('searchPlaceholder')"
         />
       </div>
 
@@ -145,7 +145,7 @@
           v-if="!filteredList.length"
           class="lfl__empty"
         >
-          No options
+          {{ t('noOptions') }}
         </div>
       </div>
     </div>
@@ -156,6 +156,7 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { uniqueColumnValues, type LocalListLookup } from './localFilter'
 import { useVirtualList } from '../useVirtualList'
+import { useLocale } from '../../i18n'
 
 // Keep in sync with the `.lfl__list-item` height in the stylesheet below.
 const ITEM_HEIGHT = 32
@@ -169,6 +170,7 @@ const emit = defineEmits<{
   'value-changed': [payload: { key: string; lookup: LocalListLookup; values: unknown[] }]
 }>()
 
+const { t } = useLocale()
 const dropdownWrapper = ref<HTMLDivElement | null>(null)
 const showDropdown = ref(false)
 const searchText = ref('')
@@ -259,7 +261,7 @@ function applyFilter() {
     width: 24px;
     height: 24px;
     flex-shrink: 0;
-    margin-right: 4px;
+    margin-inline-end: 4px;
     padding: 0;
     background: transparent;
     border: none;
@@ -291,7 +293,7 @@ function applyFilter() {
   &__dropdown {
     position: absolute;
     top: calc(100% + 4px);
-    left: 0;
+    inset-inline-start: 0;
     z-index: 1000;
     min-width: 240px;
     max-width: 300px;
@@ -438,8 +440,7 @@ function applyFilter() {
   &__list-window {
     position: absolute;
     top: 0;
-    left: 0;
-    right: 0;
+    inset-inline: 0;
     will-change: transform;
   }
 

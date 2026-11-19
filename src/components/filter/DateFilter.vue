@@ -45,6 +45,7 @@
       type="button"
       :class="{ 'df__clear-btn--hidden': !filterApplied }"
       :disabled="!filterApplied"
+      :aria-label="t('clear')"
       @click="clearFilter()"
     >
       <svg
@@ -89,6 +90,7 @@
 import { ref, computed, onMounted, type PropType } from 'vue'
 import { DateInput } from 'b-date-input'
 import type { BTableDateFilter } from '../../types'
+import { useLocale } from '../../i18n'
 
 type DateRange = [string | null, string | null]
 
@@ -105,6 +107,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['count-filter', 'value-changed'])
+const { t } = useLocale()
 
 const rootRef = ref<HTMLElement | null>(null)
 const range = ref<DateRange>([props.initialAfter, props.initialBefore])
@@ -115,7 +118,7 @@ let wasOpen = false
 
 const summary = computed(() => {
   const [after, before] = range.value
-  if (!after || !before) return 'Date...'
+  if (!after || !before) return t('datePlaceholder')
   // Drop the year when the whole range is in the current year to keep the column narrow.
   const year = String(new Date().getFullYear())
   const withYear = !after.startsWith(year) || !before.startsWith(year)
@@ -227,7 +230,7 @@ function rangeChanged(val: DateRange | null) {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    margin-left: auto;
+    margin-inline-start: auto;
     padding: 0;
     background: transparent;
     border: none;

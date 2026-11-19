@@ -11,6 +11,8 @@
         <button
           class="tf__icon-btn"
           type="button"
+          :title="t('filterType')"
+          :aria-label="t('filterType')"
           @click="showDropdown = !showDropdown"
         >
           <svg
@@ -66,7 +68,7 @@
       <input
         v-model="searchValue"
         :id="`text-filter-search-input__${props.column}`"
-        placeholder="Search..."
+        :placeholder="t('searchPlaceholder')"
         type="text"
         autocomplete="off"
         class="tf__input"
@@ -78,6 +80,7 @@
         type="button"
         :class="{ 'tf__clear-btn--hidden': !filterApplied }"
         :disabled="!filterApplied"
+        :aria-label="t('clear')"
         @click="clearFilter()"
       >
         <svg
@@ -98,7 +101,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useLocale } from '../../i18n'
 
 const props = defineProps({
   title: { type: String, required: true },
@@ -118,14 +122,15 @@ const showDropdown = ref(false)
 const symbol = ref(props.initialSymbol || props.defaultSymbol)
 const searchValue = ref(props.initialValue)
 const filterApplied = ref(!!props.initialValue)
-const textFilterOptions = [
-  { title: 'Start with', value: '__istartswith' },
-  { title: 'End with', value: '__iendswith' },
-  { title: 'Contains', value: '__icontains' },
-  { title: 'Exact', value: '__iexact' },
-  { title: 'Except', value: '__not' },
-  { title: 'Comma separate', value: '__comma_separate' },
-]
+const { t } = useLocale()
+const textFilterOptions = computed(() => [
+  { title: t('startWith'), value: '__istartswith' },
+  { title: t('endWith'), value: '__iendswith' },
+  { title: t('contains'), value: '__icontains' },
+  { title: t('exact'), value: '__iexact' },
+  { title: t('except'), value: '__not' },
+  { title: t('commaSeparate'), value: '__comma_separate' },
+])
 const symbols = ref([
   { key: '__istartswith', value: 'sw' },
   { key: '__iendswith', value: 'ew' },
@@ -214,7 +219,7 @@ function applyFilter() {
     width: 24px;
     height: 24px;
     padding: 0;
-    margin-right: 4px;
+    margin-inline-end: 4px;
     background: transparent;
     border: none;
     border-radius: 50%;
@@ -229,7 +234,7 @@ function applyFilter() {
   &__dropdown {
     position: absolute;
     top: calc(100% + 4px);
-    left: 0;
+    inset-inline-start: 0;
     z-index: 1000;
     min-width: 130px;
     margin: 0;
@@ -249,7 +254,7 @@ function applyFilter() {
     border-radius: 8px;
     background: transparent;
     border: none;
-    text-align: left;
+    text-align: start;
     font-size: 0.875rem;
     cursor: pointer;
     color: var(--b-dropdown-text, inherit);

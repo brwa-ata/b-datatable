@@ -49,7 +49,7 @@
       <input
         v-model="searchValue"
         :id="`text-filter-local-input__${props.columnKey}`"
-        placeholder="Search..."
+        :placeholder="t('searchPlaceholder')"
         type="text"
         autocomplete="off"
         class="tfl__input"
@@ -81,7 +81,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useLocale } from '../../i18n'
 import type { LocalTextSymbol } from './localFilter'
 
 const props = defineProps<{
@@ -99,14 +100,15 @@ const showDropdown = ref(false)
 const symbol = ref<LocalTextSymbol>('co')
 const searchValue = ref('')
 const filterApplied = ref(false)
-const textFilterOptions: Array<{ title: string; value: LocalTextSymbol }> = [
-  { title: 'Start with', value: 'sw' },
-  { title: 'End with', value: 'ew' },
-  { title: 'Contains', value: 'co' },
-  { title: 'Exact', value: 'ex' },
-  { title: 'Except', value: 'exc' },
-  { title: 'Comma separate', value: 'cs' },
-]
+const { t } = useLocale()
+const textFilterOptions = computed<Array<{ title: string; value: LocalTextSymbol }>>(() => [
+  { title: t('startWith'), value: 'sw' },
+  { title: t('endWith'), value: 'ew' },
+  { title: t('contains'), value: 'co' },
+  { title: t('exact'), value: 'ex' },
+  { title: t('except'), value: 'exc' },
+  { title: t('commaSeparate'), value: 'cs' },
+])
 
 function onClickOutside(e: MouseEvent) {
   if (dropdownWrapper.value && !dropdownWrapper.value.contains(e.target as Node)) {
@@ -166,7 +168,7 @@ function applyFilter() {
     width: 24px;
     height: 24px;
     padding: 0;
-    margin-right: 4px;
+    margin-inline-end: 4px;
     background: transparent;
     border: none;
     border-radius: 50%;
@@ -181,7 +183,7 @@ function applyFilter() {
   &__dropdown {
     position: absolute;
     top: calc(100% + 4px);
-    left: 0;
+    inset-inline-start: 0;
     z-index: 1000;
     min-width: 130px;
     margin: 0;
@@ -199,7 +201,7 @@ function applyFilter() {
     padding: 6px 14px;
     background: transparent;
     border: none;
-    text-align: left;
+    text-align: start;
     font-size: 0.875rem;
     cursor: pointer;
     color: var(--b-dropdown-text, inherit);

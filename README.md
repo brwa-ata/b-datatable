@@ -96,6 +96,40 @@ Two details worth knowing:
   do not switch `storeFiltersInLocalStorage` on keep the old behaviour, where reset only emits
   `click:reset`.
 
+## Language and RTL
+
+Built-in strings (toolbar tooltips, filter menus, placeholders, "No results found", ...) come in
+English (`en`, default), Kurdish Sorani (`ckb`) and Arabic (`ar`). `ckb` and `ar` render right-to-left
+automatically. Region tags such as `ar-IQ` are accepted; an unknown locale falls back to English.
+
+```
+<BDatatable :headers="headers" :api-data="apiData" locale="ckb" />
+```
+
+| prop       | type                             | default            |
+| ---------- | -------------------------------- | ------------------ |
+| `locale`   | `'en' \| 'ckb' \| 'ar'`          | `'en'`             |
+| `dir`      | `'ltr' \| 'rtl'`                 | follows the locale |
+| `messages` | `Partial<BMessages>`             | `null`             |
+
+`BTable` takes the same three props, and inherits them when it sits inside a `BDatatable`.
+Column titles come from your `headers`, so translate those yourself.
+
+Override any single string with `messages` (keys are listed in `src/i18n.ts`):
+
+```
+<BDatatable locale="ar" :messages="{ noResults: 'لا توجد فواتير' }" />
+```
+
+Or set an app-wide default when installing the plugin (a component's own props still win). Pass a
+`reactive()` object to switch the language at runtime:
+
+```
+import BDatatablePlugin from 'b-datatable'
+
+app.use(BDatatablePlugin, { locale: 'ckb' })
+```
+
 ## How to use
 
 | simple table with local sort, filter and search

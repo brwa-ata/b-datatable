@@ -9,6 +9,14 @@
       >
         Dark/Light
       </button>
+      <select
+        v-model="locale"
+        class="theme-btn"
+      >
+        <option value="en">English</option>
+        <option value="ckb">کوردی</option>
+        <option value="ar">العربية</option>
+      </select>
     </div>
 
     <BDatatable
@@ -30,6 +38,7 @@
       show-totals
       show-expand
       :theme="theme"
+      :locale="locale"
       density="compact"
       :use-virtual-scroll="true"
       store-table-header-in-local-storage
@@ -445,6 +454,8 @@ async function getData() {
     loading.value = false
   }
 }
+
+const locale = ref<'en' | 'ckb' | 'ar'>('en')
 
 // change theme
 const theme = ref<Theme>(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')

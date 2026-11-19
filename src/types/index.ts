@@ -1,3 +1,7 @@
+import type { BDirection, BMessages } from '../i18n'
+
+export type { BLocale, BDirection, BMessages, BMessageKey, BLocaleOptions } from '../i18n'
+
 export type Theme = 'light' | 'dark'
 
 export interface TableBorder {
@@ -147,4 +151,13 @@ export default interface BDatatableProps {
   footerClass?: string
   rowClass?: RowClass | RowClassResolver
   defaultTextSymbol?: string
+  /**
+   * UI language: `'en'` (default), `'ckb'` (Kurdish Sorani) or `'ar'` (Arabic).
+   * Region tags such as `'ar-IQ'` are accepted. Falls back to the plugin option.
+   */
+  locale?: string | null
+  /** Text direction; follows the locale when omitted (`ckb` and `ar` render RTL). */
+  dir?: BDirection | null
+  /** Overrides individual built-in strings, e.g. `{ noResults: 'Nothing here' }`. */
+  messages?: Partial<BMessages> | null
 }

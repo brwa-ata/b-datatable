@@ -49,7 +49,7 @@
       <input
         v-model="searchValue"
         :id="`number-filter-local-input__${props.columnKey}`"
-        placeholder="Search..."
+        :placeholder="t('searchPlaceholder')"
         type="text"
         autocomplete="off"
         class="nfl__input"
@@ -81,7 +81,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useLocale } from '../../i18n'
 import type { LocalNumberSymbol } from './localFilter'
 
 const props = defineProps<{
@@ -98,14 +99,16 @@ const showDropdown = ref(false)
 const symbol = ref<LocalNumberSymbol>('=')
 const searchValue = ref('')
 const filterApplied = ref(false)
-const numberFilterOptions: Array<{ title: string; value: LocalNumberSymbol }> = [
-  { title: 'Equal (=)', value: '=' },
-  { title: 'Greater than (>)', value: '>' },
-  { title: 'Greater than or Equal (>=)', value: '>=' },
-  { title: 'Less than (<)', value: '<' },
-  { title: 'Less than or Equal (<=)', value: '<=' },
-  { title: 'Not Equal (!=)', value: '!=' },
-]
+const { t } = useLocale()
+// The math symbol is wrapped in an LTR isolate so `>=` keeps its shape inside RTL text.
+const numberFilterOptions = computed<Array<{ title: string; value: LocalNumberSymbol }>>(() => [
+  { title: `${t('equal')} (\u2066=\u2069)`, value: '=' },
+  { title: `${t('greaterThan')} (\u2066>\u2069)`, value: '>' },
+  { title: `${t('greaterThanOrEqual')} (\u2066>=\u2069)`, value: '>=' },
+  { title: `${t('lessThan')} (\u2066<\u2069)`, value: '<' },
+  { title: `${t('lessThanOrEqual')} (\u2066<=\u2069)`, value: '<=' },
+  { title: `${t('notEqual')} (\u2066!=\u2069)`, value: '!=' },
+])
 
 function onClickOutside(e: MouseEvent) {
   if (dropdownWrapper.value && !dropdownWrapper.value.contains(e.target as Node)) {
@@ -172,7 +175,7 @@ function applyFilter() {
     width: 24px;
     height: 24px;
     padding: 0;
-    margin-right: 4px;
+    margin-inline-end: 4px;
     background: transparent;
     border: none;
     border-radius: 50%;
@@ -187,7 +190,7 @@ function applyFilter() {
   &__dropdown {
     position: absolute;
     top: calc(100% + 4px);
-    left: 0;
+    inset-inline-start: 0;
     z-index: 1000;
     min-width: 180px;
     margin: 0;
@@ -205,7 +208,7 @@ function applyFilter() {
     padding: 6px 14px;
     background: transparent;
     border: none;
-    text-align: left;
+    text-align: start;
     font-size: 0.875rem;
     cursor: pointer;
     color: var(--b-dropdown-text, inherit);

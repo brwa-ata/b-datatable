@@ -2,6 +2,7 @@
   <div
     ref="wrapperRef"
     class="b__table-wrapper"
+    :dir="dir"
     :class="{
       'b__fixed-header': props.fixedHeader,
       'b__border-vertical': borderConfig.vertical,
@@ -28,7 +29,7 @@
         v-model="searchQuery"
         type="text"
         class="b__search-input"
-        placeholder="Search..."
+        :placeholder="t('searchPlaceholder')"
       />
       <span
         v-if="searchQuery"
@@ -63,6 +64,7 @@
               <input
                 type="checkbox"
                 class="b__select-checkbox"
+                :aria-label="t('selectAll')"
                 :checked="isAllChecked"
                 :indeterminate="isIndeterminate"
                 @change="toggleAllChecked"
@@ -168,6 +170,9 @@
                 <button
                   class="b__expand-btn"
                   :class="{ 'b__expand-btn--expanded': isRowExpanded(item) }"
+                  type="button"
+                  :aria-label="t('expandRow')"
+                  :aria-expanded="isRowExpanded(item)"
                   @click="toggleExpand(item)"
                 >
                   <svg
@@ -194,6 +199,7 @@
                   :id="`b__table-checkbox-${item[props.itemKey]}`"
                   type="checkbox"
                   class="b__select-checkbox"
+                  :aria-label="t('selectRow')"
                   :checked="checkedRows.includes(item)"
                   @change="toggleRowCheck(item)"
                 />
@@ -252,7 +258,7 @@
               :colspan="props.headers.length + leadingColCount"
               class="b__no-results-text"
             >
-              <slot name="no-results-text"> No results found </slot>
+              <slot name="no-results-text">{{ t('noResults') }}</slot>
             </td>
           </tr>
         </template>
@@ -267,6 +273,7 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import { SearchIcon, TimesCircleIcon, SortIcon, SortUpIcon, SortDownIcon } from './icons'
+import { provideLocale } from '../i18n'
 
 const props = defineProps({
   headers: { type: Array, required: true, default: () => [] },
@@ -306,7 +313,15 @@ const props = defineProps({
   // The sorted column to show as already sorted, e.g. { column: 'id', direction: 'desc' }.
   // BDatatable feeds its restored sort through here; null clears the indicator.
   initialSort: { type: Object, default: null },
+  // 'en' | 'ckb' | 'ar'. Left unset, BTable follows the BDatatable around it (or the plugin option).
+  locale: { type: String, default: null },
+  // 'ltr' | 'rtl'. Left unset, it follows the locale.
+  dir: { type: String, default: null, validator: (value) => value === null || ['ltr', 'rtl'].includes(value) },
+  // Overrides individual built-in strings, e.g. { noResults: 'Nothing here' }
+  messages: { type: Object, default: null },
 })
+
+const { t, dir } = provideLocale(() => ({ locale: props.locale, dir: props.dir, messages: props.messages }))
 
 const emit = defineEmits([
   'update:sort',
@@ -788,7 +803,7 @@ $density-compact-height: 34px;
 
 .b__search-icon {
   position: absolute;
-  left: 24px;
+  inset-inline-start: 24px;
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
@@ -804,7 +819,7 @@ $density-compact-height: 34px;
 
 .b__clear-icon {
   position: absolute;
-  right: 24px;
+  inset-inline-end: 24px;
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
@@ -1243,6 +1258,30 @@ $density-compact-height: 34px;
   &--expanded {
     transform: rotate(90deg);
     opacity: 1;
+  }
+}
+
+// RTL: the collapsed chevron points to the inline start (left), and turns down when expanded
+.b__table-wrapper[dir='rtl'] .b__expand-btn {
+  svg {
+    transform: scaleX(-1);
+  }
+
+  &--expanded {
+    transform: rotate(-90deg);
+  }
+}
+
+.b__table-wrapper[dir='rtl'] .b__loading-progress-indicator {
+  animation-name: b__progress-slide-rtl !important;
+}
+
+@keyframes b__progress-slide-rtl {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-400%);
   }
 }
 

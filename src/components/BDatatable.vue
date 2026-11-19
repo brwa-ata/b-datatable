@@ -1,5 +1,8 @@
 <template>
-  <div class="b-dt">
+  <div
+    class="b-dt"
+    :dir="dir"
+  >
     <!-- toolbar -->
     <div
       class="b-dt__toolbar"
@@ -20,7 +23,8 @@
           v-if="props.showResetBtn"
           class="b-dt__tool-btn"
           type="button"
-          title="Refresh"
+          :title="t('refresh')"
+          :aria-label="t('refresh')"
           :disabled="props.loading"
           :class="{ 'b-dt__btn-disabled': props.loading }"
           @click="handleReset"
@@ -48,7 +52,8 @@
           v-if="props.showSearchBtn"
           class="b-dt__tool-btn"
           type="button"
-          title="Search"
+          :title="t('search')"
+          :aria-label="t('search')"
           :disabled="props.loading"
           :class="{ 'b-dt__btn-disabled': props.loading }"
           @click="handleSearch()"
@@ -76,7 +81,8 @@
           v-if="props.showPrintBtn"
           class="b-dt__tool-btn"
           type="button"
-          title="Print"
+          :title="t('print')"
+          :aria-label="t('print')"
           :disabled="props.loading"
           :class="{ 'b-dt__btn-disabled': props.loading }"
           @click="handlePrint()"
@@ -112,7 +118,8 @@
           v-if="props.showExportToExcelBtn"
           class="b-dt__tool-btn b-dt__tool-btn--excel"
           type="button"
-          title="Export to Excel"
+          :title="t('exportToExcel')"
+          :aria-label="t('exportToExcel')"
           :disabled="props.loading || props.exportLoading"
           :class="{ 'b-dt__btn-disabled': props.loading || props.exportLoading }"
           @click="handleExcel"
@@ -172,7 +179,8 @@
           <button
             class="b-dt__tool-btn"
             type="button"
-            title="Toggle Columns"
+            :title="t('toggleColumns')"
+            :aria-label="t('toggleColumns')"
             :disabled="props.loading"
             :class="{ 'b-dt__btn-disabled': props.loading }"
             @click="showColumnsDropdown = !showColumnsDropdown"
@@ -260,7 +268,7 @@
                 class="b-dt__reorder-reset-btn"
                 @click="resetColumnOrder"
               >
-                Restore Default
+                {{ t('restoreDefault') }}
               </button>
             </div>
           </div>
@@ -281,6 +289,7 @@
             :disabled="props.loading"
             :class="{ 'b-dt__btn-disabled': props.loading }"
             :style="toolbarBgStyle"
+            :title="t('rowsPerPage')"
             @click="showPerPageDropdown = !showPerPageDropdown"
           >
             {{ props.perPage }}
@@ -320,7 +329,7 @@
           <span
             class="b-dt__count-badge"
             :style="toolbarBgStyle"
-            :title="`${(props.apiData.count || 0).toLocaleString()} records`"
+            :title="t('records', { count: (props.apiData.count || 0).toLocaleString() })"
           >
             {{ (props.apiData.count || 0).toLocaleString() }}
           </span>
@@ -334,6 +343,8 @@
               class="b-dt__pager-btn"
               type="button"
               :disabled="props.page <= 1 || props.loading || !props.apiData.previous"
+              :title="t('previousPage')"
+              :aria-label="t('previousPage')"
               @click="prevPage()"
             >
               <svg
@@ -358,6 +369,8 @@
               class="b-dt__pager-btn"
               type="button"
               :disabled="props.loading || !props.apiData.next"
+              :title="t('nextPage')"
+              :aria-label="t('nextPage')"
               @click="nextPage()"
             >
               <svg
@@ -427,6 +440,7 @@
             <input
               type="checkbox"
               class="b__select-checkbox"
+              :aria-label="t('selectAll')"
               :checked="isAllChecked"
               :indeterminate="isIndeterminate"
               @change="toggleAllChecked"
@@ -619,6 +633,7 @@ import {
   type LocalNumberSymbol,
   type LocalListLookup,
 } from './filterLocal/localFilter'
+import { provideLocale } from '../i18n'
 import type BDatatableProps from '../types'
 import type {
   BTableDateFilter,
@@ -673,7 +688,13 @@ const props = withDefaults(defineProps<BDatatableProps>(), {
   footerClass: '',
   rowClass: '',
   defaultTextSymbol: '__istartswith',
+  locale: null,
+  dir: null,
+  messages: null,
 })
+
+// Translations + text direction; BTable and the filters below read the same context.
+const { t, dir } = provideLocale(() => ({ locale: props.locale, dir: props.dir, messages: props.messages }))
 
 const emit = defineEmits<{
   'update:data': [items: Array<object>]
@@ -1288,7 +1309,7 @@ defineExpose({
   &__columns-dropdown {
     position: absolute;
     top: calc(100% + 4px);
-    left: 0;
+    inset-inline-start: 0;
     z-index: 1000;
     min-width: 180px;
     margin: 0;
@@ -1330,7 +1351,7 @@ defineExpose({
   &__reorder-handle {
     display: inline-flex;
     align-items: center;
-    margin-right: 0px;
+    margin-inline-end: 0px;
     opacity: 0.4;
     flex-shrink: 0;
   }
@@ -1402,7 +1423,7 @@ defineExpose({
   &__perpage-dropdown {
     position: absolute;
     top: calc(100% + 4px);
-    left: 0;
+    inset-inline-start: 0;
     z-index: 1000;
     min-width: 70px;
     margin: 0;
@@ -1474,6 +1495,11 @@ defineExpose({
       opacity: 0.35;
       cursor: default;
     }
+  }
+
+  // prev / next chevrons point the way the pages run
+  &[dir='rtl'] &__pager-btn svg {
+    transform: scaleX(-1);
   }
 
   &__pager-info {

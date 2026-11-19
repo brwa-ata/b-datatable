@@ -11,6 +11,8 @@
         <button
           class="nf__icon-btn"
           type="button"
+          :title="t('filterType')"
+          :aria-label="t('filterType')"
           @click="showDropdown = !showDropdown"
         >
           <svg
@@ -175,7 +177,7 @@
       <input
         v-model="searchValue"
         :id="`number-filter-search-input__${props.column}`"
-        placeholder="Search..."
+        :placeholder="t('searchPlaceholder')"
         type="text"
         autocomplete="off"
         class="nf__input"
@@ -187,6 +189,7 @@
         type="button"
         :class="{ 'nf__clear-btn--hidden': !filterApplied }"
         :disabled="!filterApplied"
+        :aria-label="t('clear')"
         @click="clearFilter()"
       >
         <svg
@@ -207,7 +210,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useLocale } from '../../i18n'
 
 const props = defineProps({
   title: { type: String, required: true },
@@ -230,13 +234,14 @@ const symbol = ref(props.initialSymbol || '__eq')
 
 const searchValue = ref<string | number | null>(props.initialValue)
 const filterApplied = ref(props.initialValue !== null && props.initialValue !== '')
-const numberFilterOptions = ref([
-  { label: 'Equal', value: '__eq' },
-  { label: 'Greater than', value: '__gt' },
-  { label: 'Greater than or Equal', value: '__gte' },
-  { label: 'Less than', value: '__lt' },
-  { label: 'Less than or Equal', value: '__lte' },
-  { label: 'Not Equal', value: '__not_eq' },
+const { t } = useLocale()
+const numberFilterOptions = computed(() => [
+  { label: t('equal'), value: '__eq' },
+  { label: t('greaterThan'), value: '__gt' },
+  { label: t('greaterThanOrEqual'), value: '__gte' },
+  { label: t('lessThan'), value: '__lt' },
+  { label: t('lessThanOrEqual'), value: '__lte' },
+  { label: t('notEqual'), value: '__not_eq' },
 ])
 const mathSymbols = ref([
   { key: '__eq', value: '=' },
@@ -335,7 +340,7 @@ function onlyNumber(val: string | number | null): number | string | null {
     width: 24px;
     height: 24px;
     padding: 0;
-    margin-right: 4px;
+    margin-inline-end: 4px;
     background: transparent;
     border: none;
     border-radius: 50%;
@@ -350,7 +355,7 @@ function onlyNumber(val: string | number | null): number | string | null {
   &__dropdown {
     position: absolute;
     top: calc(100% + 4px);
-    left: 0;
+    inset-inline-start: 0;
     z-index: 1000;
     min-width: 180px;
     margin: 0;
@@ -373,7 +378,7 @@ function onlyNumber(val: string | number | null): number | string | null {
     border-radius: 8px;
     background: transparent;
     border: none;
-    text-align: left;
+    text-align: start;
     font-size: 0.875rem;
     cursor: pointer;
     color: var(--b-dropdown-text, inherit);
