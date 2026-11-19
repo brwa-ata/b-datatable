@@ -508,6 +508,12 @@
                   :column-key="column.key"
                   @value-changed="applyLocalNumberFilter"
                 />
+                <IdFilter
+                  v-else-if="column.filterType === 'id'"
+                  :title="column.title"
+                  :column="column.key"
+                  @value-changed="applyLocalIdFilter"
+                />
                 <ListFilterLocal
                   v-else-if="column.filterType === 'list'"
                   :column-key="column.key"
@@ -549,6 +555,14 @@
                   :initial-lookup="storedListLookup(column.column)"
                   :initial-values="storedFilters.list[column.column ?? '']?.values ?? []"
                   @value-changed="applyListFilter"
+                />
+                <IdFilter
+                  v-else-if="column.filterType === 'id'"
+                  :key="`id-${column.key}-${filterEpoch}`"
+                  :title="column.title"
+                  :column="column.column"
+                  :initial-value="storedFilters.id[column.column ?? '']?.value ?? ''"
+                  @value-changed="applyIdFilter"
                 />
                 <DateFilter
                   v-else-if="column.filterType === 'date'"
@@ -623,6 +637,7 @@ import TextFilter from './filter/TextFilter.vue'
 import NumberFilter from './filter/NumberFilter.vue'
 import ListFilter from './filter/ListFilter.vue'
 import DateFilter from './filter/DateFilter.vue'
+import IdFilter from './filter/IdFilter.vue'
 import TextFilterLocal from './filterLocal/TextFilterLocal.vue'
 import NumberFilterLocal from './filterLocal/NumberFilterLocal.vue'
 import ListFilterLocal from './filterLocal/ListFilterLocal.vue'
@@ -637,6 +652,7 @@ import { provideLocale } from '../i18n'
 import type BDatatableProps from '../types'
 import type {
   BTableDateFilter,
+  BTableIdFilter,
   BTableListFilter,
   BTableNumberFilter,
   BTablePerPage,
@@ -702,6 +718,7 @@ const emit = defineEmits<{
   'update:number-filter': [obj: BTableNumberFilter]
   'update:list-filter': [obj: BTableListFilter]
   'update:date-filter': [obj: BTableDateFilter]
+  'update:id-filter': [obj: BTableIdFilter]
   'update:sort': [obj: BTableSort]
   'update:prev-page': [page: number]
   'update:next-page': [page: number]
@@ -754,7 +771,7 @@ const dragOverIndex = ref<number | null>(null)
 const filterEpoch = ref(0)
 
 function emptyStoredFilters(): BTableStoredFilters {
-  return { text: {}, number: {}, list: {}, date: {}, sort: null }
+  return { text: {}, number: {}, list: {}, date: {}, id: {}, sort: null }
 }
 
 const filtersStorageKey = computed(() =>
@@ -798,6 +815,9 @@ function loadStoredFilters(): BTableStoredFilters {
   }
   for (const [column, filter] of Object.entries(saved.date ?? {})) {
     if (columns.has(column) && filter?.after && filter?.before) stored.date[column] = filter
+  }
+  for (const [column, filter] of Object.entries(saved.id ?? {})) {
+    if (columns.has(column) && filter?.value) stored.id[column] = filter
   }
   if (saved.sort?.column && saved.sort?.direction && keys.has(saved.sort.column)) stored.sort = saved.sort
 
@@ -859,10 +879,16 @@ function emitRestoredFilters() {
     number: Object.values(storedFilters.value.number),
     list: Object.values(storedFilters.value.list),
     date: Object.values(storedFilters.value.date),
+    id: Object.values(storedFilters.value.id),
     sort: storedFilters.value.sort,
   }
   const hasFilter =
-    restored.text.length || restored.number.length || restored.list.length || restored.date.length || restored.sort
+    restored.text.length ||
+    restored.number.length ||
+    restored.list.length ||
+    restored.date.length ||
+    restored.id.length ||
+    restored.sort
   if (hasFilter) emit('filters:restored', restored)
 }
 
@@ -1098,6 +1124,11 @@ function applyLocalNumberFilter({ key, symbol, value }: { key: string; symbol: L
   setLocalFilter(key, value !== '' ? { type: 'number', symbol, value } : null)
 }
 
+// Local mode has no backend lookup to skip, so an id filter is an exact text match.
+function applyLocalIdFilter({ column, value }: BTableIdFilter) {
+  setLocalFilter(column, value ? { type: 'text', symbol: 'ex', value } : null)
+}
+
 function applyLocalListFilter({ key, lookup, values }: { key: string; lookup: LocalListLookup; values: unknown[] }) {
   setLocalFilter(key, values.length ? { type: 'list', lookup, values } : null)
 }
@@ -1128,6 +1159,12 @@ function applyDateFilter(obj: BTableDateFilter) {
   else delete storedFilters.value.date[obj.column]
   saveStoredFilters()
   emit('update:date-filter', obj)
+}
+function applyIdFilter(obj: BTableIdFilter) {
+  if (obj.value) storedFilters.value.id[obj.column] = obj
+  else delete storedFilters.value.id[obj.column]
+  saveStoredFilters()
+  emit('update:id-filter', obj)
 }
 function handleSort(obj: BTableSort) {
   storedFilters.value.sort = obj?.column && obj?.direction ? { column: obj.column, direction: obj.direction } : null

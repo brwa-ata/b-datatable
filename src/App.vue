@@ -56,6 +56,7 @@
       @update:number-filter="handleUpdateNumberFilter"
       @update:list-filter="handleUpdateListFilter"
       @update:date-filter="handleUpdateDateFilter"
+      @update:id-filter="handleUpdateIdFilter"
       @update:sort="handleUpdateSort"
       @update:prev-page="handleUpdatePrevPage"
       @update:next-page="handleUpdateNextPage"
@@ -138,6 +139,7 @@ import type {
   BTableNumberFilter,
   BTableListFilter,
   BTableDateFilter,
+  BTableIdFilter,
   Theme,
 } from './types'
 
@@ -517,6 +519,7 @@ function handleFiltersRestored(obj: BTableRestoredFilters) {
   obj.number.forEach(applyNumberFilter)
   obj.list.forEach(applyListFilter)
   obj.date.forEach(applyDateFilter)
+  obj.id.forEach(applyIdFilter)
   if (obj.sort) applySort(obj.sort)
 }
 
@@ -592,6 +595,11 @@ function applyDateFilter(obj: BTableDateFilter) {
   }
 }
 
+function applyIdFilter(obj: BTableIdFilter) {
+  delete queryParams.value[obj.columnQuery]
+  if (obj.value) queryParams.value[obj.columnQuery] = obj.value
+}
+
 function applySort(obj: BTableSort) {
   if (obj?.column && obj?.direction) {
     if (obj.direction === 'asc') {
@@ -624,6 +632,12 @@ function handleUpdateListFilter(obj: BTableListFilter) {
 
 function handleUpdateDateFilter(obj: BTableDateFilter) {
   applyDateFilter(obj)
+  queryParams.value.page = 1
+  getData()
+}
+
+function handleUpdateIdFilter(obj: BTableIdFilter) {
+  applyIdFilter(obj)
   queryParams.value.page = 1
   getData()
 }

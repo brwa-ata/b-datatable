@@ -70,6 +70,14 @@ export interface BTableListFilter {
   values: unknown[]
 }
 
+/** Exact match on the bare column: `columnQuery` is the column itself, no lookup suffix. */
+export interface BTableIdFilter {
+  column: string
+  /** null when the filter is cleared */
+  value: string | null
+  columnQuery: string
+}
+
 /** Dates are 'YYYY-MM-DD'; both are null when the filter is cleared. */
 export interface BTableDateFilter {
   column: string
@@ -91,6 +99,7 @@ export interface BTableStoredFilters {
   number: Record<string, BTableNumberFilter>
   list: Record<string, BTableListFilter>
   date: Record<string, BTableDateFilter>
+  id: Record<string, BTableIdFilter>
   sort: BTableSort | null
 }
 
@@ -104,6 +113,7 @@ export interface BTableRestoredFilters {
   number: Array<BTableNumberFilter>
   list: Array<BTableListFilter>
   date: Array<BTableDateFilter>
+  id: Array<BTableIdFilter>
   sort: BTableSort | null
 }
 

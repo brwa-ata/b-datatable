@@ -46,6 +46,28 @@ function handleDateFilter(obj) {
 }
 ```
 
+## ID filter
+
+`filterType: 'id'` is a plain input with no lookup menu: it filters on the exact value, sent under the
+bare column name (`?id=42`, no `__suffix`). Pressing Enter applies it, clearing it emits `value: null`:
+
+```
+{ title: 'ID', key: 'id', column: 'id', sortable: true, filterType: 'id' }
+```
+
+```
+<BDatatable :headers="headers" @update:id-filter="handleIdFilter" />
+
+function handleIdFilter(obj) {
+  // obj = { column: 'id', value: '42', columnQuery: 'id' }   (value is null when cleared)
+  delete queryParams[obj.columnQuery]
+  if (obj.value) queryParams[obj.columnQuery] = obj.value
+  getData()
+}
+```
+
+With `localFilter` it is an exact match on the loaded rows.
+
 ## Remembering filters (localStorage)
 
 `storeTableHeaderInLocalStorage` remembers which columns are shown and in what order.
@@ -76,11 +98,12 @@ requesting, and let the first request go out filtered:
 
 ```
 function handleFiltersRestored(obj) {
-  // obj = { text: [...], number: [...], list: [...], date: [...], sort: { column, direction } | null }
+  // obj = { text: [...], number: [...], list: [...], date: [...], id: [...], sort: { column, direction } | null }
   obj.text.forEach(applyTextFilter)
   obj.number.forEach(applyNumberFilter)
   obj.list.forEach(applyListFilter)
   obj.date.forEach(applyDateFilter)
+  obj.id.forEach(applyIdFilter)
   if (obj.sort) applySort(obj.sort)
 }
 ```
