@@ -589,11 +589,13 @@ function toggleSort(columnKey) {
 
 // Resolve a header key against an item, supporting dot-notation paths (e.g. "branch.name").
 function getCellValue(item, key) {
-  if (item === null || key === null) return undefined
+  if (item == null || key == null) return undefined
   if (key in item) return item[key]
+  // `== null` stops at undefined too: once one link is missing (a row with no
+  // `location` under "location.city.name") the next would read off undefined
   return String(key)
     .split('.')
-    .reduce((acc, part) => (acc === null ? undefined : acc[part]), item)
+    .reduce((acc, part) => (acc == null ? undefined : acc[part]), item)
 }
 
 // Computed property for filtered items (search)
